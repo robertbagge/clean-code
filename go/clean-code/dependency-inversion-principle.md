@@ -2,7 +2,11 @@
 
 ## Overview
 
-The Dependency Inversion Principle states that high-level modules should not depend on low-level modules; both should depend on abstractions. In Go, this is achieved through interfaces, allowing high-level business logic to depend on interface contracts rather than concrete implementations. This makes code more flexible, testable, and maintainable.
+The Dependency Inversion Principle states that high-level modules should not
+depend on low-level modules; both should depend on abstractions. In Go, this
+is achieved through interfaces, allowing high-level business logic to depend
+on interface contracts rather than concrete implementations. This makes code
+more flexible, testable, and maintainable.
 
 ## Core Concept
 
@@ -84,7 +88,13 @@ func (u *UserService) CreateUser(name, email string) error {
 ### GOOD — Abstraction-Based (DIP compliant)
 
 > High-level code declares the behavior it needs; low-level code implements it.
-> Note: The **UserRepository** interface lives alongside the **UserService** (the consumer). Concrete repos (**SQLUserRepository**, **InMemoryUserRepository**, etc.) just implement it, without importing the service package. This follows Go’s convention: consumers define interfaces, providers implement them.
+
+Note:
+> The **UserRepository** interface lives alongside the **UserService**
+> (the consumer). Concrete repos (**SQLUserRepository**,
+> **InMemoryUserRepository**, etc.) just implement it, without importing the
+> service package. This follows Go's convention: consumers define interfaces,
+> providers implement them.
 
 ```go
 import "context"
@@ -110,7 +120,8 @@ func (u *UserService) GetUser(ctx context.Context, id string) (*User, error) {
     return u.repo.GetUser(ctx, id)
 }
 
-func (u *UserService) CreateUser(ctx context.Context, name, email string) (*User, error) {
+func (u *UserService) CreateUser(ctx context.Context, name, email string) (
+    *User, error) {
     user := &User{ID: generateID(), Name: name, Email: email}
     if err := u.repo.CreateUser(ctx, user); err != nil {
         return nil, err
@@ -130,13 +141,16 @@ func NewSQLUserRepository(db *sql.DB) *SQLUserRepository {
     return &SQLUserRepository{db: db}
 }
 
-func (s *SQLUserRepository) GetUser(ctx context.Context, id string) (*User, error) {
+func (s *SQLUserRepository) GetUser(ctx context.Context, id string) (
+    *User, error) {
     var user User
     err := s.db.QueryRowContext(ctx,
         "SELECT id, name, email FROM users WHERE id = ?", id,
     ).Scan(&user.ID, &user.Name, &user.Email)
     if err != nil {
-        if errors.Is(err, sql.ErrNoRows) { return nil, ErrUserNotFound }
+        if errors.Is(err, sql.ErrNoRows) {
+            return nil, ErrUserNotFound
+        }
         return nil, err
     }
     return &user, nil
@@ -176,28 +190,43 @@ func NewInMemoryUserRepository() *InMemoryUserRepository {
     return &InMemoryUserRepository{users: make(map[string]*User)}
 }
 
-func (i *InMemoryUserRepository) GetUser(ctx context.Context, id string) (*User, error) {
-    i.mu.RLock(); defer i.mu.RUnlock()
+func (i *InMemoryUserRepository) GetUser(ctx context.Context, id string) (
+    *User, error) {
+    i.mu.RLock()
+    defer i.mu.RUnlock()
     u, ok := i.users[id]
-    if !ok { return nil, ErrUserNotFound }
+    if !ok {
+        return nil, ErrUserNotFound
+    }
     return u, nil
 }
 
-func (i *InMemoryUserRepository) CreateUser(ctx context.Context, user *User) error {
-    i.mu.Lock(); defer i.mu.Unlock()
+func (i *InMemoryUserRepository) CreateUser(
+    ctx context.Context, user *User,
+) error {
+    i.mu.Lock()
+    defer i.mu.Unlock()
     i.users[user.ID] = user
     return nil
 }
 
-func (i *InMemoryUserRepository) UpdateUser(ctx context.Context, user *User) error {
-    i.mu.Lock(); defer i.mu.Unlock()
-    if _, ok := i.users[user.ID]; !ok { return ErrUserNotFound }
+func (i *InMemoryUserRepository) UpdateUser(
+    ctx context.Context, user *User,
+) error {
+    i.mu.Lock()
+    defer i.mu.Unlock()
+    if _, ok := i.users[user.ID]; !ok {
+        return ErrUserNotFound
+    }
     i.users[user.ID] = user
     return nil
 }
 
-func (i *InMemoryUserRepository) DeleteUser(ctx context.Context, id string) error {
-    i.mu.Lock(); defer i.mu.Unlock()
+func (i *InMemoryUserRepository) DeleteUser(
+    ctx context.Context, id string,
+) error {
+    i.mu.Lock()
+    defer i.mu.Unlock()
     delete(i.users, id)
     return nil
 }
@@ -228,7 +257,9 @@ func EnsureUserExists(
     }
 
     u := &User{ID: id, Name: name, Email: email}
-    if err := c.CreateUser(ctx, u); err != nil { return nil, err }
+    if err := c.CreateUser(ctx, u); err != nil {
+        return nil, err
+    }
     return u, nil
 }
 ```
@@ -269,9 +300,11 @@ type Config struct {
 ## Anti-patterns to Avoid
 
 1. **Over-abstraction**: Creating interfaces for everything
-2. **Leaky abstractions**: Interfaces that expose implementation details (e.g., `*sql.Rows`)
+2. **Leaky abstractions**: Interfaces that expose implementation details
+   (e.g., `*sql.Rows`)
 3. **Anemic / vague interfaces**: So generic they don’t convey intent
-4. **Provider-owned interfaces**: Defining interfaces in the implementation package instead of where they’re consumed
+4. **Provider-owned interfaces**: Defining interfaces in the implementation
+   package instead of where they're consumed
 
 ---
 

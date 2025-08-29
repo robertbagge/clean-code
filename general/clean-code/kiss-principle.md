@@ -18,6 +18,7 @@ The simplest solution that works is usually the best solution.
 
 ```typescript
 interface User {
+  id: string;
   name: string;
   age: number;
   active: boolean;
@@ -89,7 +90,8 @@ class UserSearchService {
 class UserSearchService {
   search(users: User[], criteria: SearchCriteria): User[] {
     return users.filter(user => {
-      if (criteria.name && !user.name.toLowerCase().includes(criteria.name.toLowerCase())) {
+      if (criteria.name && 
+          !user.name.toLowerCase().includes(criteria.name.toLowerCase())) {
         return false;
       }
       
@@ -108,7 +110,7 @@ class UserSearchService {
 
 // Simple utility functions
 function findUserById(users: User[], id: string): User | undefined {
-  return users.find(user => user.name === id);
+  return users.find(user => user.id === id);
 }
 
 function getActiveUsers(users: User[]): User[] {

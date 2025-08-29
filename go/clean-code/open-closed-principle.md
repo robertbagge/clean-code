@@ -2,9 +2,13 @@
 
 ## Overview
 
-OCP: **open for extension, closed for modification**. In Go, you get this by leaning on **interfaces, composition, and registration**. Add new behavior by *adding new implementations*, not by editing existing business logic.
+OCP: **open for extension, closed for modification**. In Go, you get this
+by leaning on **interfaces, composition, and registration**. Add new behavior
+by *adding new implementations*, not by editing existing business logic.
 
-> Pragmatic note: If you keep **SRP, OCP, ISP, DIP** tight, you’re \~90% of the way to good Go design. LSP tends to “fall out” when your interfaces are small and consumer-defined.
+> Pragmatic note: If you keep **SRP, OCP, ISP, DIP** tight, you're \~90% of
+> the way to good Go design. LSP tends to "fall out" when your interfaces are
+> small and consumer-defined.
 
 ---
 
@@ -101,7 +105,8 @@ func (n *NotificationService) Broadcast(ctx context.Context, msg string) {
 }
 ```
 
-To add Slack/Teams/Webhook, *add a new type that satisfies `Notifier`*; no edits to `NotificationService`.
+To add Slack/Teams/Webhook, *add a new type that satisfies `Notifier`*; no
+edits to `NotificationService`.
 
 ---
 
@@ -184,5 +189,6 @@ func (f *FakeNotifier) Send(ctx context.Context, m string) error {
 
 ## Related Best Practices
 
-For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
+For package structure, where to define interfaces, error placement, and
+testing patterns (fakes, table-driven tests, golden files), see
 👉 **[best-practices.md](../best-practices.md)**

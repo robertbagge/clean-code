@@ -2,9 +2,12 @@
 
 ## Overview
 
-KISS: favor the **simplest thing that works**. In Go that means clear, direct code using the standard library, with minimal abstractions.
+KISS: favor the **simplest thing that works**. In Go that means clear, direct
+code using the standard library, with minimal abstractions.
 
-> **Pragmatic note:** If you keep **SRP, OCP, ISP, and DIP** tight, you’re \~90% there. **KISS** is the day-to-day compass that stops over-engineering before it starts.
+> **Pragmatic note:** If you keep **SRP, OCP, ISP, and DIP** tight, you're
+> \~90% there. **KISS** is the day-to-day compass that stops over-engineering
+> before it starts.
 
 ---
 
@@ -144,7 +147,8 @@ Why this is KISS:
 * Stick to the **standard library** first
 * Use **named constants** instead of magic numbers/strings
 * Keep **error paths explicit** (`fmt.Errorf("...: %w", err)`)
-* Add **interfaces only at the consumer** and only when you have >1 impl or need seams for tests
+* Add **interfaces only at the consumer** and only when you have >1 impl or
+  need seams for tests
 
 ---
 
@@ -159,5 +163,6 @@ Why this is KISS:
 
 ## Related Best Practices
 
-For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
+For package structure, where to define interfaces, error placement, and
+testing patterns (fakes, table-driven tests, golden files), see
 👉 **[best-practices.md](../best-practices.md)**

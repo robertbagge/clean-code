@@ -2,7 +2,8 @@
 
 ## Overview
 
-A class/module/function should have **one reason to change**. This improves testability, reduces coupling, and makes code easier to understand and maintain.
+A class/module/function should have **one reason to change**. This improves
+testability, reduces coupling, and makes code easier to understand and maintain.
 
 ## Core Concept
 

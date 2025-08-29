@@ -91,7 +91,10 @@ class PricingService {
     vip: 0.20
   };
   
-  private calculateDiscount(price: number, customerType: Customer['type']): number {
+  private calculateDiscount(
+    price: number, 
+    customerType: Customer['type']
+  ): number {
     const rate = this.DISCOUNT_RATES[customerType] || 0;
     return price * rate;
   }
@@ -100,7 +103,10 @@ class PricingService {
     return amount * (1 + this.TAX_RATE);
   }
   
-  private getDiscountedPrice(basePrice: number, customerType: Customer['type']): number {
+  private getDiscountedPrice(
+    basePrice: number, 
+    customerType: Customer['type']
+  ): number {
     return basePrice - this.calculateDiscount(basePrice, customerType);
   }
   

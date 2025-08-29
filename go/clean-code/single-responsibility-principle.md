@@ -2,7 +2,8 @@
 
 ## Overview
 
-SRP: a type/function/package should have **one reason to change**. In Go this falls out of **small packages, tiny interfaces, and composition**.
+SRP: a type/function/package should have **one reason to change**. In Go this
+falls out of **small packages, tiny interfaces, and composition**.
 
 ---
 
@@ -119,19 +120,26 @@ type ProductReader interface {
 
 type SQLProductRepository struct{ db *sql.DB }
 
-func (r *SQLProductRepository) Find(ctx context.Context, f ProductFilter) ([]Product, error) {
+func (r *SQLProductRepository) Find(ctx context.Context, f ProductFilter) (
+    []Product, error) {
     q := "SELECT id,name,price,category FROM products WHERE 1=1"
     var args []any
     i := 1
 
     if f.Category != "" {
-        q += fmt.Sprintf(" AND category = $%d", i); args = append(args, f.Category); i++
+        q += fmt.Sprintf(" AND category = $%d", i)
+        args = append(args, f.Category)
+        i++
     }
     if f.MinPrice > 0 {
-        q += fmt.Sprintf(" AND price >= $%d", i); args = append(args, f.MinPrice); i++
+        q += fmt.Sprintf(" AND price >= $%d", i)
+        args = append(args, f.MinPrice)
+        i++
     }
     if f.MaxPrice > 0 {
-        q += fmt.Sprintf(" AND price <= $%d", i); args = append(args, f.MaxPrice); i++
+        q += fmt.Sprintf(" AND price <= $%d", i)
+        args = append(args, f.MaxPrice)
+        i++
     }
 
     rows, err := r.db.QueryContext(ctx, q, args...)
@@ -141,7 +149,9 @@ func (r *SQLProductRepository) Find(ctx context.Context, f ProductFilter) ([]Pro
     var out []Product
     for rows.Next() {
         var p Product
-        if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Category); err != nil { return nil, err }
+        if err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Category); err != nil {
+            return nil, err
+        }
         out = append(out, p)
     }
     return out, rows.Err()
@@ -150,9 +160,12 @@ func (r *SQLProductRepository) Find(ctx context.Context, f ProductFilter) ([]Pro
 // --- Business concern ---
 type ProductService struct{ repo ProductReader }
 
-func NewProductService(repo ProductReader) *ProductService { return &ProductService{repo: repo} }
+func NewProductService(repo ProductReader) *ProductService {
+    return &ProductService{repo: repo}
+}
 
-func (s *ProductService) List(ctx context.Context, f ProductFilter) ([]Product, error) {
+func (s *ProductService) List(ctx context.Context, f ProductFilter) (
+    []Product, error) {
     if f.MaxPrice > 0 && f.MaxPrice < f.MinPrice {
         return nil, ErrInvalidMinPrice // business rule lives here
     }
@@ -162,18 +175,24 @@ func (s *ProductService) List(ctx context.Context, f ProductFilter) ([]Product, 
 // --- HTTP concern ---
 type ProductHandler struct{ svc *ProductService }
 
-func NewProductHandler(svc *ProductService) *ProductHandler { return &ProductHandler{svc: svc} }
+func NewProductHandler(svc *ProductService) *ProductHandler {
+    return &ProductHandler{svc: svc}
+}
 
 func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
     f, err := ParseProductFilter(r)
     if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest); return
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
     }
     items, err := h.svc.List(r.Context(), f)
     if err != nil {
         code := http.StatusInternalServerError
-        if errors.Is(err, ErrInvalidMinPrice) { code = http.StatusBadRequest }
-        http.Error(w, err.Error(), code); return
+        if errors.Is(err, ErrInvalidMinPrice) {
+            code = http.StatusBadRequest
+        }
+        http.Error(w, err.Error(), code)
+        return
     }
     w.Header().Set("Content-Type", "application/json")
     _ = json.NewEncoder(w).Encode(items)
@@ -194,7 +213,11 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 ```go
 // Fake repo for handler/service tests.
 type FakeRepo struct{ out []Product; err error }
-func (f *FakeRepo) Find(ctx context.Context, _ ProductFilter) ([]Product, error) { return f.out, f.err }
+func (f *FakeRepo) Find(
+    ctx context.Context, _ ProductFilter,
+) ([]Product, error) {
+    return f.out, f.err
+}
 
 // Example idea:
 //  - NewProductService(&FakeRepo{out: []Product{{ID:1}}})
@@ -233,5 +256,6 @@ func (f *FakeRepo) Find(ctx context.Context, _ ProductFilter) ([]Product, error)
 
 ## Related Best Practices
 
-For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
+For package structure, where to define interfaces, error placement, and
+testing patterns (fakes, table-driven tests, golden files), see
 👉 **[best-practices.md](../best-practices.md)**

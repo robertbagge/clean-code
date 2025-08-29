@@ -6,7 +6,8 @@ description: Use only sections that apply. Optional sections are marked “(opti
 
 ## Overview
 
-[1–3 lines. Why it matters. Keep pragmatic: how it improves testability, clarity, or extensibility.]
+[1–3 lines. Why it matters. Keep pragmatic: how it improves testability,
+clarity, or extensibility.]
 
 ## Core Concept
 
@@ -54,4 +55,5 @@ description: Use only sections that apply. Optional sections are marked “(opti
 
 ## Related Best Practices (Optional)
 
-See **[best-practices.md](<link to best practices doc>)** for package structure, where to define interfaces, error mapping, and testing patterns.
+See **[best-practices.md](<link to best practices doc>)** for package
+structure, where to define interfaces, error mapping, and testing patterns.

@@ -19,7 +19,7 @@ asdf install
 task ci
 ```
 
-For other available commands urn
+For other available commands run
 
 ```bash
 task list

@@ -2,7 +2,10 @@
 
 ## Overview
 
-DRY = **one source of truth** for knowledge (rules, constants, behavior). In Go, keep rules centralized and reuse them via **small types, constants, and helpers** — while resisting over-abstraction. Prefer **explicit, readable code** that avoids copy-paste drift.
+DRY = **one source of truth** for knowledge (rules, constants, behavior).
+In Go, keep rules centralized and reuse them via **small types, constants,
+and helpers** — while resisting over-abstraction. Prefer **explicit,
+readable code** that avoids copy-paste drift.
 
 ---
 
@@ -59,10 +62,14 @@ var (
 ```go
 // Same checks repeated in multiple handlers; rules will diverge over time.
 func (uc *UserController) RegisterUser(data map[string]string) error {
-    if len(data["email"]) < 5 || !regexp.MustCompile(`@`).MatchString(data["email"]) {
+    emailValid := len(data["email"]) >= 5 &&
+        regexp.MustCompile(`@`).MatchString(data["email"])
+    if !emailValid {
         return ErrInvalidEmail
     }
-    if len(data["password"]) < 8 || !regexp.MustCompile(`[A-Z]`).MatchString(data["password"]) {
+    pwValid := len(data["password"]) >= 8 &&
+        regexp.MustCompile(`[A-Z]`).MatchString(data["password"])
+    if !pwValid {
         return ErrInvalidPassword
     }
     age, _ := strconv.Atoi(data["age"])
@@ -74,7 +81,9 @@ func (uc *UserController) RegisterUser(data map[string]string) error {
 
 func (uc *UserController) UpdateProfile(_ string, data map[string]string) error {
     if email := data["email"]; email != "" {
-        if len(email) < 5 || !regexp.MustCompile(`@`).MatchString(email) {
+        emailValid := len(email) >= 5 &&
+            regexp.MustCompile(`@`).MatchString(email)
+        if !emailValid {
             return ErrInvalidEmail
         }
     }
@@ -107,20 +116,25 @@ type Validator struct {
 
 func NewValidator() *Validator {
     return &Validator{
-        emailRegex:    regexp.MustCompile(`^[^@]+@[^@]+\.[^@]+$`), // compiled once
+        // compiled once
+        emailRegex:    regexp.MustCompile(`^[^@]+@[^@]+\.[^@]+$`),
         passwordRegex: regexp.MustCompile(`[A-Z]`),
     }
 }
 
 func (v *Validator) ValidateEmail(email string) error {
-    if len(email) < EmailMinLength || !v.emailRegex.MatchString(email) {
+    valid := len(email) >= EmailMinLength &&
+        v.emailRegex.MatchString(email)
+    if !valid {
         return ErrInvalidEmail
     }
     return nil
 }
 
 func (v *Validator) ValidatePassword(pw string) error {
-    if len(pw) < PasswordMinLength || !v.passwordRegex.MatchString(pw) {
+    valid := len(pw) >= PasswordMinLength &&
+        v.passwordRegex.MatchString(pw)
+    if !valid {
         return ErrInvalidPassword
     }
     return nil
@@ -134,15 +148,23 @@ func (v *Validator) ValidateAge(age int) error {
 }
 
 // One entrypoint = one source of truth for user validation.
-func (v *Validator) ValidateUser(u UserData, policy UserPolicy) error {
+func (v *Validator) ValidateUser(
+    u UserData, policy UserPolicy,
+) error {
     if policy == PolicyCreate || u.Email != "" {
-        if err := v.ValidateEmail(u.Email); err != nil { return err }
+        if err := v.ValidateEmail(u.Email); err != nil {
+            return err
+        }
     }
     if policy == PolicyCreate || u.Password != "" {
-        if err := v.ValidatePassword(u.Password); err != nil { return err }
+        if err := v.ValidatePassword(u.Password); err != nil {
+            return err
+        }
     }
     if policy == PolicyCreate || u.Age != 0 {
-        if err := v.ValidateAge(u.Age); err != nil { return err }
+        if err := v.ValidateAge(u.Age); err != nil {
+            return err
+        }
     }
     return nil
 }
@@ -153,7 +175,9 @@ type UserController struct {
     db        *sql.DB
 }
 
-func (uc *UserController) RegisterUser(ctx context.Context, u UserData, w http.ResponseWriter) {
+func (uc *UserController) RegisterUser(
+    ctx context.Context, u UserData, w http.ResponseWriter,
+) {
     if err := uc.validator.ValidateUser(u, PolicyCreate); err != nil {
         status := http.StatusBadRequest
         switch {
@@ -168,19 +192,24 @@ func (uc *UserController) RegisterUser(ctx context.Context, u UserData, w http.R
         return
     }
 
-    _, err := uc.db.ExecContext(ctx, "INSERT INTO users(email,password,age) VALUES($1,$2,$3)",
+    _, err := uc.db.ExecContext(ctx,
+        "INSERT INTO users(email,password,age) VALUES($1,$2,$3)",
         u.Email, u.Password, u.Age)
     if err != nil {
-        http.Error(w, "database error", http.StatusInternalServerError); return
+        http.Error(w, "database error", http.StatusInternalServerError)
+        return
     }
 
     w.Header().Set("Content-Type", "application/json")
     _ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
 }
 
-func (uc *UserController) UpdateProfile(ctx context.Context, u UserData, w http.ResponseWriter) {
+func (uc *UserController) UpdateProfile(
+    ctx context.Context, u UserData, w http.ResponseWriter,
+) {
     if err := uc.validator.ValidateUser(u, PolicyUpdate); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest); return
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
     }
     // ... apply partial updates ...
     _ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
@@ -209,15 +238,22 @@ func (uc *UserController) UpdateProfile(ctx context.Context, u UserData, w http.
 ### **Interfaces for shared behavior**
 
 ```go
-type Validatable interface{ Validate(context.Context) error }
-func ValidateAny(ctx context.Context, v Validatable) error { return v.Validate(ctx) }
+type Validatable interface {
+    Validate(context.Context) error
+}
+
+func ValidateAny(ctx context.Context, v Validatable) error {
+    return v.Validate(ctx)
+}
 ```
 
 ### **Embedding common fields**
 
 ```go
 type BaseEntity struct {
-    ID string; CreatedAt, UpdatedAt int64
+    ID        string
+    CreatedAt int64
+    UpdatedAt int64
 }
 type User struct {
     BaseEntity
@@ -228,9 +264,13 @@ type User struct {
 ### **Generics for reusable helpers** (Go 1.18+)
 
 ```go
-func FindByID[T any](xs []T, want string, idOf func(T) string) *T {
+func FindByID[T any](
+    xs []T, want string, idOf func(T) string,
+) *T {
     for i := range xs {
-        if idOf(xs[i]) == want { return &xs[i] }
+        if idOf(xs[i]) == want {
+            return &xs[i]
+        }
     }
     return nil
 }
@@ -255,5 +295,6 @@ func FindByID[T any](xs []T, want string, idOf func(T) string) *T {
 
 ## Related Best Practices
 
-For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
+For package structure, where to define interfaces, error placement,
+and testing patterns (fakes, table-driven tests, golden files), see
 👉 **[best-practices.md](../best-practices.md)**

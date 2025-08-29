@@ -6,7 +6,8 @@
 - [ ] High-level code depends on interfaces, not concrete drivers (DIP)
 - [ ] Interfaces are small and defined in the consumer (ISP)
 - [ ] New backends don’t require editing consumers (OCP)
-- [ ] For critical schemas and DTOs strong-typing is maintained and preferred over clean-code interfaces
+- [ ] For critical schemas and DTOs strong-typing is maintained and preferred
+      over clean-code interfaces
 
 ## Behavior
 
