@@ -55,7 +55,7 @@ fix links, keep concise.
 
 ### A) Clean-code Principle Doc (used for SRP/OCP/ISP/DIP/LSP/DRY/KISS)
 
-- [Template](../templates/tech-writer/clean-code-principle-template.md)
+- [Template](../templates/tech-writer/clean-code-principle.template.md)
 
 #### Notes
 
@@ -73,7 +73,7 @@ selective contract tests.
 
 ### B) General Concept Doc (non-clean-code)
 
-- [Template](../templates/tech-writer/general-doc-template.md)
+- [Template](../templates/tech-writer/general-doc.template.md)
 
 ---
 

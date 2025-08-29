@@ -52,6 +52,6 @@ description: Use only sections that apply. Optional sections are marked “(opti
 
 - \[3–5 bullets, crisp and implementation-oriented.]
 
-## Related Best Practices
+## Related Best Practices (Optional)
 
-See **[best-practices.md](../best-practices.md)** for package structure, where to define interfaces, error mapping, and testing patterns.
+See **[best-practices.md](<link to best practices doc>)** for package structure, where to define interfaces, error mapping, and testing patterns.

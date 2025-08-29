@@ -1,0 +1,23 @@
+version: '3'
+
+
+tasks:
+  default:
+    desc: Run all checks
+    cmds:
+      - task --list
+
+  check:links:
+    desc: Check links w. Lychee
+    cmds:
+      - lychee --offline './**/*.md'
+
+  check:lint:
+    desc: Run markdownlint
+    cmds:
+      - markdownlint-cli2 '**/*.md' '**/*.markdown'
+
+  ci:
+    desc: Run CI checks
+    cmds:
+      - task --parallel check:links check:lint
