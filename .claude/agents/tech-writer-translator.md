@@ -48,6 +48,8 @@ the concrete behaviors they imply.
 include optional sections *only if relevant*.
 4. **Polish** → verify code compiles (or provide minimal scaffolding),
 fix links, keep concise.
+5. **Formatting** → Check the format with `task ci` and make any adjustment
+if the task fails.
 
 ---
 
@@ -108,9 +110,8 @@ selective contract tests.
 - **Conciseness**: Single screen per doc where possible.
 - **Consistency**: Same section order/style across principles.
 - **Runnable**: Code compiles or is clearly marked “Scaffolding”.
-- **Well-formatted**: Document complies with
-[markdownlint rules](https://github.com/DavidAnson/markdownlint/tree/v0.34.0/doc),
-e.g. line-length <= 80 characters
+- **Well-formatted**: You must run `task ci` and have no errors before
+you are considered done.
 
 ---
 
