@@ -18,9 +18,9 @@ In Go, DIP means:
 * Use dependency injection to provide implementations
 * Balance abstraction with Go’s preference for simplicity
 
----
+## Implementation Example
 
-## Scaffolding for Examples (so snippets compile)
+### Scaffolding for Examples (so snippets compile)
 
 ```go
 package users
@@ -48,10 +48,6 @@ type User struct {
 // Utility stub for examples.
 func generateID() string { return fmt.Sprintf("u_%d", time.Now().UnixNano()) }
 ```
-
----
-
-## Implementation Examples
 
 ### BAD — Concrete Database Dependency (DIP violation)
 
@@ -239,9 +235,7 @@ func (i *InMemoryUserRepository) DeleteUser(
 // var _ UserRepository = (*InMemoryUserRepository)(nil)
 ```
 
----
-
-## Anonymous (call-site) Interfaces (keep DIP tight)
+#### Anonymous (call-site) Interfaces (keep DIP tight)
 
 ```go
 // Accept only the behavior you need at a call site.
@@ -266,8 +260,6 @@ func EnsureUserExists(
     return u, nil
 }
 ```
-
----
 
 ## When to Apply DIP in Go
 
@@ -298,8 +290,6 @@ type Config struct {
 }
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **Over-abstraction**: Creating interfaces for everything
@@ -309,16 +299,12 @@ type Config struct {
 4. **Provider-owned interfaces**: Defining interfaces in the implementation
    package instead of where they're consumed
 
----
-
 ## Go-Specific DIP Techniques
 
 1. **Accept interfaces, return structs**
 2. **Define interfaces at usage points** (keep them close to consumers)
 3. **Keep interfaces small** (pairs nicely with ISP)
 4. **Constructor injection** (plain constructors or functional options)
-
----
 
 ## Key Takeaways
 
@@ -327,8 +313,6 @@ type Config struct {
 * Inject implementations; don’t construct them inside business logic
 * Prefer concrete types for **data & config**
 * Mocks/fakes are trivial; tests stay fast
-
----
 
 ## Related Best Practices
 

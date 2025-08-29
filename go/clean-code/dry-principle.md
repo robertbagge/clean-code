@@ -7,8 +7,6 @@ In Go, keep rules centralized and reuse them via **small types, constants,
 and helpers** — while resisting over-abstraction. Prefer **explicit,
 readable code** that avoids copy-paste drift.
 
----
-
 ## Core Concept
 
 * Centralize **business rules** (validation, calculations, policies).
@@ -17,9 +15,9 @@ readable code** that avoids copy-paste drift.
 * Keep DRY scoped to **knowledge**, not just lines of code.
 * Balance DRY with clarity; avoid “abstracting too early.”
 
----
+## Implementation Example
 
-## Scaffolding (so snippets compile)
+### Scaffolding (so snippets compile)
 
 ```go
 package users
@@ -55,9 +53,7 @@ var (
 )
 ```
 
----
-
-## BAD — Repeated validation logic (copy-paste drift)
+### BAD — Repeated validation logic (copy-paste drift)
 
 ```go
 // Same checks repeated in multiple handlers; rules will diverge over time.
@@ -97,9 +93,7 @@ func (uc *UserController) UpdateProfile(_ string, data map[string]string) error 
 }
 ```
 
----
-
-## GOOD — DRY validation (single source + policy for create/update)
+### GOOD — DRY validation (single source + policy for create/update)
 
 ```go
 // Policy clarifies required vs optional fields.
@@ -221,13 +215,11 @@ func (uc *UserController) UpdateProfile(
 }
 ```
 
-### Why this is DRY
+#### Why this is DRY
 
 * All rules live in **one place** (`Validator` + constants).
 * **Create vs update** uses a **policy**, not duplicated branches.
 * Callers use `errors.Is` for consistent error handling.
-
----
 
 ## Anti-patterns to Avoid
 
@@ -235,8 +227,6 @@ func (uc *UserController) UpdateProfile(
 2. **Magic numbers/strings** — use **named constants**.
 3. **Scattered regex/SQL snippets** — centralize patterns and queries.
 4. **Over-DRY** — don’t hide logic behind generic abstractions that reduce clarity.
-
----
 
 ## Go-Specific DRY Techniques
 
@@ -286,8 +276,6 @@ func FindByID[T any](
 * Put thresholds, fees, hosts, etc., in one config/consts module.
 * Map **driver errors → domain errors** in one place.
 
----
-
 ## Key Takeaways
 
 * DRY the **knowledge** (rules/constants), not just code lines.
@@ -295,8 +283,6 @@ func FindByID[T any](
 * Compile heavy artifacts (regex) **once**.
 * Prefer **explicit, readable** helpers over premature abstraction.
 * Check with `errors.Is` for uniform handling.
-
----
 
 ## Related Best Practices
 

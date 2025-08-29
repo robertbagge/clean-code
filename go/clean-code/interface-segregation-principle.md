@@ -20,9 +20,9 @@ In Go, ISP means:
 Go's proverb "The bigger the interface, the weaker the abstraction"
 directly supports ISP.
 
----
+## Implementation Example
 
-## Scaffolding for Examples (so snippets compile)
+### Scaffolding for Examples (so snippets compile)
 
 ```go
 package users
@@ -55,13 +55,7 @@ type Post struct {
 type AuthToken struct{ Value string }
 ```
 
----
-
-## Examples
-
-### BAD — Monolithic interface violates ISP
-
-### (illustrative, not for production)
+### BAD — Monolithic interface violates ISP (illustrative, not for production)
 
 > This shows the *pressure* a fat interface creates. It's intentionally
 > non-idiomatic and not meant to be implemented.
@@ -127,9 +121,7 @@ type UserModerator interface {
 }
 ```
 
-#### Simple implementation that only reads
-
-#### (returns ErrNotFound correctly)
+#### Simple implementation that only reads (returns ErrNotFound correctly)
 
 ```go
 type SimpleUserViewer struct {
@@ -215,9 +207,7 @@ func ModerateUser(
 }
 ```
 
----
-
-## Interface Composition (explicit)
+#### Interface Composition (explicit)
 
 ```go
 // Compose when consumers need multiple capabilities.
@@ -244,9 +234,7 @@ func SaveAndShow(
 }
 ```
 
----
-
-## Anonymous (call-site) Interfaces (keep params tiny)
+#### Anonymous (call-site) Interfaces (keep params tiny)
 
 ```go
 // Prevents interface creep in shared packages:
@@ -266,9 +254,7 @@ func ShowUserProfileLite(
 }
 ```
 
----
-
-## Testing Tip — Implement only what tests need
+#### Testing Tip — Implement only what tests need
 
 ```go
 type fakeReader struct{ m map[string]*User }
@@ -289,8 +275,6 @@ func (f fakeReader) GetUser(
 //     "42")
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **Fat Interfaces**: Large interfaces with many methods
@@ -299,8 +283,6 @@ func (f fakeReader) GetUser(
 3. **Interface Pollution**: Creating interfaces before they’re needed
 4. **Exporting Interfaces Prematurely**: Don't export an interface
    unless code outside the package needs it
-
----
 
 ## Go-Specific ISP Techniques
 

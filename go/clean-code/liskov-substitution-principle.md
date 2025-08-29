@@ -12,8 +12,6 @@ you should be able to use it anywhere that interface is expected
 > consumer-defined interfaces and clear contracts. Add explicit LSP/contract
 > tests **selectively** for critical, multi-implementation interfaces.
 
----
-
 ## Core Concept
 
 * Implementations must honor the **interface’s behavioral contract**.
@@ -22,9 +20,9 @@ you should be able to use it anywhere that interface is expected
 * Keep **error semantics consistent** across implementations.
 * Prefer **small, focused interfaces** (pairs well with ISP).
 
----
+## Implementation Example
 
-## Scaffolding (so snippets compile)
+### Scaffolding (so snippets compile)
 
 ```go
 package payments
@@ -51,10 +49,6 @@ func generateID() string {
     return fmt.Sprintf("tx_%d", time.Now().UnixNano())
 }
 ```
-
----
-
-## Examples
 
 ### BAD — Behavioral inconsistency (violates LSP)
 
@@ -151,8 +145,6 @@ func (b *BankTransferProcessor) GetMaximumAmount() float64 {
 // var _ PaymentProcessor = (*BankTransferProcessor)(nil)
 ```
 
----
-
 ## Testing LSP (behavioral compatibility)
 
 Keep one **contract test** that runs the same scenarios across all
@@ -203,8 +195,6 @@ Add contract/LSP tests **only when it pays off**:
 * Skip for internal, single-implementation helpers where normal unit
   tests suffice.
 
----
-
 ## Key Takeaways
 
 * LSP in Go = **consistent behavior across interface impls**.
@@ -214,8 +204,6 @@ Add contract/LSP tests **only when it pays off**:
   preconditions.
 * Rely primarily on SRP/OCP/ISP/DIP; add **contract tests
   selectively**.
-
----
 
 ## Related Best Practices
 

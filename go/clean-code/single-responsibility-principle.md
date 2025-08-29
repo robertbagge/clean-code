@@ -5,8 +5,6 @@
 SRP: a type/function/package should have **one reason to change**. In Go this
 falls out of **small packages, tiny interfaces, and composition**.
 
----
-
 ## Core Concept
 
 * **Functions** do one job.
@@ -14,9 +12,9 @@ falls out of **small packages, tiny interfaces, and composition**.
 * **Packages** focus on one theme.
 * Split **transport / validation / business / persistence** concerns.
 
----
+## Implementation Example
 
-## Scaffolding (so snippets compile)
+### Scaffolding (so snippets compile)
 
 ```go
 package products
@@ -44,9 +42,7 @@ type Product struct {
 }
 ```
 
----
-
-## BAD — One handler, many responsibilities
+### BAD — One handler, many responsibilities
 
 ```go
 // Mixed concerns: HTTP parsing, validation, SQL building, DB IO, JSON rendering.
@@ -87,12 +83,10 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
----
-
-## GOOD — Separated concerns (SRP-friendly)
+### GOOD — Separated concerns (SRP-friendly)
 
 ```go
-// --- Transport/validation concern ---
+// === Transport/validation concern ===
 type ProductFilter struct {
     Category       string
     MinPrice, MaxPrice float64
@@ -113,7 +107,7 @@ func ParseProductFilter(r *http.Request) (ProductFilter, error) {
     return f, nil
 }
 
-// --- Persistence concern (DIP-ready) ---
+// === Persistence concern (DIP-ready) ===
 type ProductReader interface {
     Find(ctx context.Context, f ProductFilter) ([]Product, error)
 }
@@ -157,7 +151,7 @@ func (r *SQLProductRepository) Find(ctx context.Context, f ProductFilter) (
     return out, rows.Err()
 }
 
-// --- Business concern ---
+// === Business concern ===
 type ProductService struct{ repo ProductReader }
 
 func NewProductService(repo ProductReader) *ProductService {
@@ -172,7 +166,7 @@ func (s *ProductService) List(ctx context.Context, f ProductFilter) (
     return s.repo.Find(ctx, f)
 }
 
-// --- HTTP concern ---
+// === HTTP concern ===
 type ProductHandler struct{ svc *ProductService }
 
 func NewProductHandler(svc *ProductService) *ProductHandler {
@@ -199,14 +193,12 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-### Why this is SRP-friendly
+#### Why this is SRP-friendly
 
 * `ParseProductFilter` only parses/validates **HTTP inputs**.
 * `ProductService` holds **business rules**.
 * `SQLProductRepository` does **data access** only.
 * `ProductHandler` handles **HTTP I/O** only.
-
----
 
 ## Testing SRP (lightweight pattern)
 
@@ -226,15 +218,11 @@ func (f *FakeRepo) Find(
 //  - Swap FakeRepo.err to simulate DB error without touching handler/service code.
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **God handlers/services** that mix transport, validation, business, and persistence.
 2. **Cross-layer coupling** (e.g., HTTP types in repository signatures).
 3. **Multiple reasons to change** inside one type/file/package.
-
----
 
 ## Go-Specific SRP Techniques
 
@@ -243,16 +231,12 @@ func (f *FakeRepo) Find(
 * **Composition over inheritance** for feature growth.
 * **Constructor injection** to wire layers cleanly.
 
----
-
 ## Key Takeaways
 
 * Give each function/type/package **one clear purpose**.
 * Split **HTTP / validation / business / persistence**.
 * Define **small interfaces** at the consumer; inject implementations.
 * Test each concern **independently** with fakes.
-
----
 
 ## Related Best Practices
 

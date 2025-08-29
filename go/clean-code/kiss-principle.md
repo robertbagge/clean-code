@@ -9,18 +9,16 @@ code using the standard library, with minimal abstractions.
 > \~90% there. **KISS** is the day-to-day compass that stops over-engineering
 > before it starts.
 
----
-
 ## Core Concept
 
-* Prefer **functions over interfaces** for simple ops
-* Use **constants**, small helpers, and the **stdlib**
-* Add complexity **only when needed** (measured by real use)
-* Make errors **explicit** and predictable
+- Prefer **functions over interfaces** for simple ops
+- Use **constants**, small helpers, and the **stdlib**
+- Add complexity **only when needed** (measured by real use)
+- Make errors **explicit** and predictable
 
----
+## Implementation Examples (avoid clever abstractions)
 
-## Scaffolding (so snippets compile)
+### Scaffolding (so snippets compile)
 
 ```go
 package kiss
@@ -31,11 +29,7 @@ import (
 )
 ```
 
----
-
-## Example 1 — Factorial (avoid clever abstractions)
-
-### BAD — Over-engineered
+### BAD — Over-engineered Factorial
 
 ```go
 type MathOperation interface {
@@ -56,7 +50,7 @@ func (f *FactorialCalculator) Execute(in interface{}) interface{} {
 }
 ```
 
-### GOOD — Simple and clear
+### GOOD — Simple and clear Factorial
 
 ```go
 var (
@@ -75,15 +69,11 @@ func Factorial(n int) (uint64, error) {
 
 Why this is KISS:
 
-* **Typed input/output**, no reflection/casts
-* **Sentinel errors** document bounds
-* Straightforward loop; easy to test
+- **Typed input/output**, no reflection/casts
+- **Sentinel errors** document bounds
+- Straightforward loop; easy to test
 
----
-
-## Example 2 — Configuration (avoid over-abstraction)
-
-### BAD — Complex framework
+### BAD — Complex framework for configuration
 
 ```go
 type ConfigSource interface {
@@ -126,11 +116,9 @@ func LoadConfig() (*Config, error) {
 
 Why this is KISS:
 
-* One **plain struct** as the source of truth
-* Tiny **helper** for defaults; explicit required field
-* No registries, reflection, or plugin machinery
-
----
+- One **plain struct** as the source of truth
+- Tiny **helper** for defaults; explicit required field
+- No registries, reflection, or plugin machinery
 
 ## Anti-patterns to avoid
 
@@ -139,27 +127,21 @@ Why this is KISS:
 3. **Generic frameworks** for tiny problems
 4. **Hidden magic** (implicit globals, side effects)
 
----
-
 ## Go-specific KISS techniques
 
-* Prefer **free functions** to trivial interfaces
-* Stick to the **standard library** first
-* Use **named constants** instead of magic numbers/strings
-* Keep **error paths explicit** (`fmt.Errorf("...: %w", err)`)
-* Add **interfaces only at the consumer** and only when you have >1 impl or
+- Prefer **free functions** to trivial interfaces
+- Stick to the **standard library** first
+- Use **named constants** instead of magic numbers/strings
+- Keep **error paths explicit** (`fmt.Errorf("...: %w", err)`)
+- Add **interfaces only at the consumer** and only when you have >1 impl or
   need seams for tests
-
----
 
 ## Key Takeaways
 
-* Start simple; let **real needs** drive complexity
-* Small, typed functions beat clever abstractions
-* Keep configs as **plain structs** + tiny helpers
-* Make rules and bounds **explicit** with constants and sentinel errors
-
----
+- Start simple; let **real needs** drive complexity
+- Small, typed functions beat clever abstractions
+- Keep configs as **plain structs** + tiny helpers
+- Make rules and bounds **explicit** with constants and sentinel errors
 
 ## Related Best Practices
 
