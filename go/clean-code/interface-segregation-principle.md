@@ -137,7 +137,8 @@ type SimpleUserViewer struct {
 }
 
 func (s *SimpleUserViewer) GetUser(
-    ctx context.Context, id string,
+    ctx context.Context,
+    id string,
 ) (*User, error) {
     var u User
     err := s.db.QueryRowContext(ctx,
@@ -162,7 +163,8 @@ type AdminUserService struct {
 }
 
 func (a *AdminUserService) GetUser(
-    ctx context.Context, id string,
+    ctx context.Context,
+    id string,
 ) (*User, error) {
     var u User
     err := a.db.QueryRowContext(ctx,
@@ -178,7 +180,9 @@ func (a *AdminUserService) GetUser(
 }
 
 func (a *AdminUserService) BanUser(
-    ctx context.Context, userID string, reason string,
+    ctx context.Context,
+    userID string,
+    reason string,
 ) error {
     _, err := a.db.ExecContext(ctx,
         "UPDATE users SET banned = true, ban_reason = $1 WHERE id = $2",
@@ -192,7 +196,9 @@ func (a *AdminUserService) BanUser(
 
 ```go
 func ShowUserProfile(
-    ctx context.Context, reader UserReader, userID string,
+    ctx context.Context,
+    reader UserReader,
+    userID string,
 ) error {
     user, err := reader.GetUser(ctx, userID)
     if err != nil {
@@ -221,8 +227,10 @@ type UserReadWriter interface {
 }
 
 func SaveAndShow(
-    ctx context.Context, rw UserReadWriter,
-    id string, updates UserUpdate,
+    ctx context.Context,
+    rw UserReadWriter,
+    id string,
+    updates UserUpdate,
 ) error {
     if err := rw.UpdateUser(ctx, id, updates); err != nil {
         return err
@@ -266,7 +274,8 @@ func ShowUserProfileLite(
 type fakeReader struct{ m map[string]*User }
 
 func (f fakeReader) GetUser(
-    ctx context.Context, id string,
+    ctx context.Context,
+    id string,
 ) (*User, error) {
     if u, ok := f.m[id]; ok {
         return u, nil

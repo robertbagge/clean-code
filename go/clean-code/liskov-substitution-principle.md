@@ -94,7 +94,8 @@ type PaymentProcessor interface {
     //   {"completed","pending","failed"}.
     // - For async flows, return Status="pending" and a TransactionID.
     ProcessPayment(
-        ctx context.Context, amount float64,
+        ctx context.Context,
+        amount float64,
     ) (*PaymentResult, error)
 
     GetMinimumAmount() float64
@@ -103,8 +104,10 @@ type PaymentProcessor interface {
 
 // Immediate settlement
 type CreditCardProcessor struct{}
+
 func (c *CreditCardProcessor) ProcessPayment(
-    ctx context.Context, amount float64,
+    ctx context.Context,
+    amount float64,
 ) (*PaymentResult, error) {
     if amount < c.GetMinimumAmount() || amount > c.GetMaximumAmount() {
         return nil, ErrOutOfRange
@@ -123,8 +126,10 @@ func (c *CreditCardProcessor) GetMaximumAmount() float64 {
 
 // Asynchronous settlement (explicit via "pending")
 type BankTransferProcessor struct{}
+
 func (b *BankTransferProcessor) ProcessPayment(
-    ctx context.Context, amount float64,
+    ctx context.Context,
+    amount float64,
 ) (*PaymentResult, error) {
     if amount < b.GetMinimumAmount() || amount > b.GetMaximumAmount() {
         return nil, ErrOutOfRange
@@ -156,7 +161,9 @@ implementations.
 ```go
 // Minimal contract test
 func ContractTestProcessor(
-    t TestingT, name string, mk func() PaymentProcessor,
+    t TestingT,
+    name string,
+    mk func() PaymentProcessor,
 ) {
     t.Run(name, func(t *testing.T) {
         p := mk()

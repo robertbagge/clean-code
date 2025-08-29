@@ -202,7 +202,8 @@ func (i *InMemoryUserRepository) GetUser(ctx context.Context, id string) (
 }
 
 func (i *InMemoryUserRepository) CreateUser(
-    ctx context.Context, user *User,
+    ctx context.Context,
+    user *User,
 ) error {
     i.mu.Lock()
     defer i.mu.Unlock()
@@ -211,7 +212,8 @@ func (i *InMemoryUserRepository) CreateUser(
 }
 
 func (i *InMemoryUserRepository) UpdateUser(
-    ctx context.Context, user *User,
+    ctx context.Context,
+    user *User,
 ) error {
     i.mu.Lock()
     defer i.mu.Unlock()
@@ -223,7 +225,8 @@ func (i *InMemoryUserRepository) UpdateUser(
 }
 
 func (i *InMemoryUserRepository) DeleteUser(
-    ctx context.Context, id string,
+    ctx context.Context,
+    id string,
 ) error {
     i.mu.Lock()
     defer i.mu.Unlock()

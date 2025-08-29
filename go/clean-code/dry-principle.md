@@ -149,7 +149,8 @@ func (v *Validator) ValidateAge(age int) error {
 
 // One entrypoint = one source of truth for user validation.
 func (v *Validator) ValidateUser(
-    u UserData, policy UserPolicy,
+    u UserData,
+    policy UserPolicy,
 ) error {
     if policy == PolicyCreate || u.Email != "" {
         if err := v.ValidateEmail(u.Email); err != nil {
@@ -176,7 +177,9 @@ type UserController struct {
 }
 
 func (uc *UserController) RegisterUser(
-    ctx context.Context, u UserData, w http.ResponseWriter,
+    ctx context.Context,
+    u UserData,
+    w http.ResponseWriter,
 ) {
     if err := uc.validator.ValidateUser(u, PolicyCreate); err != nil {
         status := http.StatusBadRequest
@@ -205,7 +208,9 @@ func (uc *UserController) RegisterUser(
 }
 
 func (uc *UserController) UpdateProfile(
-    ctx context.Context, u UserData, w http.ResponseWriter,
+    ctx context.Context,
+    u UserData,
+    w http.ResponseWriter,
 ) {
     if err := uc.validator.ValidateUser(u, PolicyUpdate); err != nil {
         http.Error(w, err.Error(), http.StatusBadRequest)
