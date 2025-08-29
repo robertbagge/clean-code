@@ -2,7 +2,11 @@
 
 ## Overview
 
-The Interface Segregation Principle states that no client should be forced to depend on methods it doesn't use. In Go, this principle is naturally supported by the language's philosophy of small, focused interfaces. Go's implicit interface satisfaction and the ability to compose interfaces make it easy to follow ISP.
+The Interface Segregation Principle states that no client should be forced
+to depend on methods it doesn't use. In Go, this principle is naturally
+supported by the language's philosophy of small, focused interfaces.
+Go's implicit interface satisfaction and the ability to compose interfaces
+make it easy to follow ISP.
 
 ## Core Concept
 
@@ -13,11 +17,12 @@ In Go, ISP means:
 * Clients should depend only on the methods they need
 * Use interface composition to build complex contracts from simple ones
 
-Go’s proverb “The bigger the interface, the weaker the abstraction” directly supports ISP.
+Go's proverb "The bigger the interface, the weaker the abstraction"
+directly supports ISP.
 
----
+## Implementation Example
 
-## Scaffolding for Examples (so snippets compile)
+### Scaffolding for Examples (so snippets compile)
 
 ```go
 package users
@@ -50,13 +55,10 @@ type Post struct {
 type AuthToken struct{ Value string }
 ```
 
----
-
-## Examples
-
 ### BAD — Monolithic interface violates ISP (illustrative, not for production)
 
-> This shows the *pressure* a fat interface creates. It’s intentionally non-idiomatic and not meant to be implemented.
+> This shows the *pressure* a fat interface creates. It's intentionally
+> non-idiomatic and not meant to be implemented.
 
 ```go
 // BAD: Too many responsibilities in one interface.
@@ -73,12 +75,14 @@ type UserService interface {
     BanUser(userID string) error
 }
 
-// Hypothetical client that only needs reads would be *forced*
-// to implement unrelated methods if it had to satisfy UserService.
+// Hypothetical client that only needs reads would be *forced* to
+// implement unrelated methods if it had to satisfy UserService.
 type SimpleUserViewer struct{}
 /*
 func (s *SimpleUserViewer) GetUser(id string) (*User, error) { ... }
-func (s *SimpleUserViewer) CreateUser(email, password string) error { return ErrNotSupported }
+func (s *SimpleUserViewer) CreateUser(email, password string) error {
+    return ErrNotSupported
+}
 // ... 8 more stubs — ISP violation in practice
 */
 ```
@@ -98,7 +102,9 @@ type UserWriter interface {
 }
 
 type UserAuthenticator interface {
-    Authenticate(ctx context.Context, email, password string) (AuthToken, error)
+    Authenticate(
+        ctx context.Context, email, password string,
+    ) (AuthToken, error)
 }
 
 type UserNotifier interface {
@@ -122,10 +128,14 @@ type SimpleUserViewer struct {
     db *sql.DB
 }
 
-func (s *SimpleUserViewer) GetUser(ctx context.Context, id string) (*User, error) {
+func (s *SimpleUserViewer) GetUser(
+    ctx context.Context,
+    id string,
+) (*User, error) {
     var u User
-    err := s.db.QueryRowContext(ctx, "SELECT id, email FROM users WHERE id = $1", id).
-        Scan(&u.ID, &u.Email)
+    err := s.db.QueryRowContext(ctx,
+        "SELECT id, email FROM users WHERE id = $1", id,
+    ).Scan(&u.ID, &u.Email)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, ErrNotFound
@@ -144,10 +154,14 @@ type AdminUserService struct {
     notifier UserNotifier
 }
 
-func (a *AdminUserService) GetUser(ctx context.Context, id string) (*User, error) {
+func (a *AdminUserService) GetUser(
+    ctx context.Context,
+    id string,
+) (*User, error) {
     var u User
-    err := a.db.QueryRowContext(ctx, "SELECT id, email FROM users WHERE id = $1", id).
-        Scan(&u.ID, &u.Email)
+    err := a.db.QueryRowContext(ctx,
+        "SELECT id, email FROM users WHERE id = $1", id,
+    ).Scan(&u.ID, &u.Email)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
             return nil, ErrNotFound
@@ -157,7 +171,11 @@ func (a *AdminUserService) GetUser(ctx context.Context, id string) (*User, error
     return &u, nil
 }
 
-func (a *AdminUserService) BanUser(ctx context.Context, userID string, reason string) error {
+func (a *AdminUserService) BanUser(
+    ctx context.Context,
+    userID string,
+    reason string,
+) error {
     _, err := a.db.ExecContext(ctx,
         "UPDATE users SET banned = true, ban_reason = $1 WHERE id = $2",
         reason, userID,
@@ -169,7 +187,11 @@ func (a *AdminUserService) BanUser(ctx context.Context, userID string, reason st
 #### Client code depends only on what it uses
 
 ```go
-func ShowUserProfile(ctx context.Context, reader UserReader, userID string) error {
+func ShowUserProfile(
+    ctx context.Context,
+    reader UserReader,
+    userID string,
+) error {
     user, err := reader.GetUser(ctx, userID)
     if err != nil {
         return err
@@ -178,14 +200,14 @@ func ShowUserProfile(ctx context.Context, reader UserReader, userID string) erro
     return nil
 }
 
-func ModerateUser(ctx context.Context, mod UserModerator, userID string) error {
+func ModerateUser(
+    ctx context.Context, mod UserModerator, userID string,
+) error {
     return mod.BanUser(ctx, userID, "Terms violation")
 }
 ```
 
----
-
-## Interface Composition (explicit)
+#### Interface Composition (explicit)
 
 ```go
 // Compose when consumers need multiple capabilities.
@@ -194,7 +216,12 @@ type UserReadWriter interface {
     UserWriter
 }
 
-func SaveAndShow(ctx context.Context, rw UserReadWriter, id string, updates UserUpdate) error {
+func SaveAndShow(
+    ctx context.Context,
+    rw UserReadWriter,
+    id string,
+    updates UserUpdate,
+) error {
     if err := rw.UpdateUser(ctx, id, updates); err != nil {
         return err
     }
@@ -207,32 +234,35 @@ func SaveAndShow(ctx context.Context, rw UserReadWriter, id string, updates User
 }
 ```
 
----
-
-## Anonymous (call-site) Interfaces (keep params tiny)
+#### Anonymous (call-site) Interfaces (keep params tiny)
 
 ```go
 // Prevents interface creep in shared packages:
 func ShowUserProfileLite(
     ctx context.Context,
-    reader interface{ GetUser(context.Context, string) (*User, error) },
+    reader interface {
+        GetUser(context.Context, string) (*User, error)
+    },
     userID string,
 ) error {
     u, err := reader.GetUser(ctx, userID)
-    if err != nil { return err }
+    if err != nil {
+        return err
+    }
     fmt.Println("User:", u.Email)
     return nil
 }
 ```
 
----
-
-## Testing Tip — Implement only what tests need
+#### Testing Tip — Implement only what tests need
 
 ```go
 type fakeReader struct{ m map[string]*User }
 
-func (f fakeReader) GetUser(ctx context.Context, id string) (*User, error) {
+func (f fakeReader) GetUser(
+    ctx context.Context,
+    id string,
+) (*User, error) {
     if u, ok := f.m[id]; ok {
         return u, nil
     }
@@ -240,26 +270,30 @@ func (f fakeReader) GetUser(ctx context.Context, id string) (*User, error) {
 }
 
 // Usage in tests:
-// _ = ShowUserProfileLite(ctx, fakeReader{m: map[string]*User{"42": {ID:"42", Email:"x@y"}}}, "42")
+// _ = ShowUserProfileLite(ctx,
+//     fakeReader{m: map[string]*User{"42": {ID:"42", Email:"x@y"}}},
+//     "42")
 ```
-
----
 
 ## Anti-patterns to Avoid
 
 1. **Fat Interfaces**: Large interfaces with many methods
-2. **Stub Implementations**: Methods that return “not implemented” just to satisfy an interface
+2. **Stub Implementations**: Methods that return "not implemented"
+   just to satisfy an interface
 3. **Interface Pollution**: Creating interfaces before they’re needed
-4. **Exporting Interfaces Prematurely**: Don’t export an interface unless code outside the package needs it
-
----
+4. **Exporting Interfaces Prematurely**: Don't export an interface
+   unless code outside the package needs it
 
 ## Go-Specific ISP Techniques
 
-1. **Single-Method Interfaces**: Many stdlib interfaces are one method (`io.Reader`, `io.Writer`)
-2. **Interface Composition**: Build complex contracts from small capabilities
-3. **Accept Interfaces, Return Structs**: Keep parameters minimal and focused
-4. **Interface Discovery**: Extract interfaces from concrete types when consumers emerge
+1. **Single-Method Interfaces**: Many stdlib interfaces are one method
+   (`io.Reader`, `io.Writer`)
+2. **Interface Composition**: Build complex contracts from small
+   capabilities
+3. **Accept Interfaces, Return Structs**: Keep parameters minimal
+   and focused
+4. **Interface Discovery**: Extract interfaces from concrete types
+   when consumers emerge
 
 ---
 
@@ -268,12 +302,14 @@ func (f fakeReader) GetUser(ctx context.Context, id string) (*User, error) {
 * Keep interfaces small and focused
 * Compose interfaces when multiple capabilities are required
 * Clients should depend only on the methods they actually use
-* Go’s implicit interface satisfaction + call-site interfaces make ISP natural
+* Go's implicit interface satisfaction + call-site interfaces
+  make ISP natural
 * Follow stdlib patterns (e.g., `io` package)
 
 ---
 
 ## Related Best Practices
 
-For package structure, error placement, and testing strategies, etc., see
+For package structure, error placement, and testing strategies,
+etc., see
 👉 [best-practices.md](../best-practices.md)

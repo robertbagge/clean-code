@@ -1,10 +1,13 @@
 # Clean Code Docs — Start Here
 
-These docs help you make pragmatic Go design choices. If you only read one thing, read **Dependency Inversion (DIP)**.
+These docs help you make pragmatic Go design choices. If you only read one
+thing, read **Dependency Inversion (DIP)**.
 
 ## Why lead with DIP?
+
 - **Testability:** Inject fakes/in-memory deps.
-- **Portability:** Swap drivers (SQL/Mongo/HTTP) without touching business logic.
+- **Portability:** Swap drivers (SQL/Mongo/HTTP) without touching business
+  logic.
 - **Boundaries:** Consumers define interfaces; providers implement them.
 
 👉 **Start here:** [Dependency Inversion (DIP)](clean-code/dependency-inversion-principle.md)
@@ -14,8 +17,10 @@ These docs help you make pragmatic Go design choices. If you only read one thing
 ## Jump to the right guide
 
 - **New service or refactor?**  
-  Read: [DIP](clean-code/dependency-inversion-principle.md) → [SRP](clean-code/single-responsibility-principle.md)  
-  Also see: [best-practices.md › Package Structure](./best-practices.md#package-structure) and [› Dependency Injection](./best-practices.md#dependency-injection)
+  Read: [DIP](clean-code/dependency-inversion-principle.md) →
+  [SRP](clean-code/single-responsibility-principle.md)  
+  Also see: [best-practices.md › Package Structure](./best-practices.md#package-structure)
+  and [› Dependency Injection](./best-practices.md#dependency-injection)
 
 - **Business logic imports `database/sql` or an SDK?**  
   Read: [DIP](clean-code/dependency-inversion-principle.md)
@@ -41,8 +46,10 @@ These docs help you make pragmatic Go design choices. If you only read one thing
 
 - **Where to define interfaces** → [best-practices.md › Interfaces](./best-practices.md#interfaces)
 - **Domain errors & driver→domain mapping** → [best-practices.md › Error Handling](./best-practices.md#error-handling)
-- **Constructor injection / functional options** → [best-practices.md › Dependency Injection](./best-practices.md#dependency-injection)
-- **Testing (fakes, table, golden, contract)** → [best-practices.md › Testing Practices](./best-practices.md#testing-practices)
+- **Constructor injection / functional options** →
+  [best-practices.md › Dependency Injection](./best-practices.md#dependency-injection)
+- **Testing (fakes, table, golden, contract)** →
+  [best-practices.md › Testing Practices](./best-practices.md#testing-practices)
 - **Package layout** → [best-practices.md › Package Structure](./best-practices.md#package-structure)
 
 ---
@@ -58,4 +65,5 @@ These docs help you make pragmatic Go design choices. If you only read one thing
 - **KISS:** Simplest thing that works; avoid premature abstraction.
 
 ## Check yourself before you wreck yourself
+
 Use the quick [design-checklist.md](./design-checklist.md) before shipping.

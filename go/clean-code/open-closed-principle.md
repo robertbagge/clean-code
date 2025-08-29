@@ -2,11 +2,13 @@
 
 ## Overview
 
-OCP: **open for extension, closed for modification**. In Go, you get this by leaning on **interfaces, composition, and registration**. Add new behavior by *adding new implementations*, not by editing existing business logic.
+OCP: **open for extension, closed for modification**. In Go, you get this
+by leaning on **interfaces, composition, and registration**. Add new behavior
+by *adding new implementations*, not by editing existing business logic.
 
-> Pragmatic note: If you keep **SRP, OCP, ISP, DIP** tight, you’re \~90% of the way to good Go design. LSP tends to “fall out” when your interfaces are small and consumer-defined.
-
----
+> Pragmatic note: If you keep **SRP, OCP, ISP, DIP** tight, you're \~90% of
+> the way to good Go design. LSP tends to "fall out" when your interfaces are
+> small and consumer-defined.
 
 ## Core Concept
 
@@ -16,9 +18,9 @@ OCP: **open for extension, closed for modification**. In Go, you get this by lea
 * Consider a **registration/factory** for pluggable backends.
 * Keep interfaces **small** (pairs nicely with ISP).
 
----
+## Implementation Example
 
-## Scaffolding (so snippets compile)
+### Scaffolding (so snippets compile)
 
 ```go
 package notify
@@ -29,9 +31,7 @@ import (
 )
 ```
 
----
-
-## BAD — Switch explosion (violates OCP)
+### BAD — Switch explosion (violates OCP)
 
 ```go
 func SendNotification(ctx context.Context, message, channel string) error {
@@ -50,9 +50,7 @@ func SendNotification(ctx context.Context, message, channel string) error {
 
 Adding a new channel forces edits to existing code (risk, review churn, redeploy).
 
----
-
-## GOOD — Interface + composition (OCP-friendly)
+### GOOD — Interface + composition (OCP-friendly)
 
 ```go
 // Define behavior in the consumer package.
@@ -101,11 +99,10 @@ func (n *NotificationService) Broadcast(ctx context.Context, msg string) {
 }
 ```
 
-To add Slack/Teams/Webhook, *add a new type that satisfies `Notifier`*; no edits to `NotificationService`.
+To add Slack/Teams/Webhook, *add a new type that satisfies `Notifier`*; no
+edits to `NotificationService`.
 
----
-
-## Optional: Plugin registration (extensible without touching wiring)
+#### Optional: Plugin registration (extensible without touching wiring)
 
 ```go
 // Simple registry for runtime-configurable backends.
@@ -145,9 +142,7 @@ func init() {
 
 Now new channels are **just new registrations**.
 
----
-
-## Testing OCP (lightweight)
+#### Testing OCP (lightweight)
 
 ```go
 // Fake to verify service behavior without real backends.
@@ -163,15 +158,11 @@ func (f *FakeNotifier) Send(ctx context.Context, m string) error {
 // - Add another Notifier; rerun without changing service code
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **Switch/type-assertion cascades** in consumers for behavior.
 2. **Modifying existing code** to add a backend/algorithm.
 3. **Provider-owned fat interfaces** (define interfaces in consumers, keep them small).
-
----
 
 ## Key Takeaways
 
@@ -180,9 +171,8 @@ func (f *FakeNotifier) Send(ctx context.Context, m string) error {
 * Use **composition** and (optionally) a **registry** to plug new behavior.
 * Test via fakes; consumers shouldn’t change when implementations change.
 
----
-
 ## Related Best Practices
 
-For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
+For package structure, where to define interfaces, error placement, and
+testing patterns (fakes, table-driven tests, golden files), see
 👉 **[best-practices.md](../best-practices.md)**

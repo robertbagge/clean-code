@@ -1,7 +1,9 @@
 # Go Best Practices
 
-This document collects general coding practices that cut across multiple principles.
-It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY) with conventions for interfaces, error handling, testing, and dependency management.
+This document collects general coding practices that cut across multiple
+principles. It complements the [Clean Code-focused docs](./clean-code/) (e.g.
+DIP, ISP, DRY) with conventions for interfaces, error handling, testing, and
+dependency management.
 
 ---
 
@@ -45,7 +47,8 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
 
 * **Providers (infra packages)** should expose concrete types only.
   They just *happen* to implement consumer-defined interfaces.
-* **Exception:** If an interface is so generic and broadly useful (e.g. `io.Reader`), define it in a shared package. But this is rare.
+* **Exception:** If an interface is so generic and broadly useful (e.g.
+  `io.Reader`), define it in a shared package. But this is rare.
 
 ### Other interface guidelines
 
@@ -84,7 +87,8 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
 
 ### Wrapping
 
-* Use `fmt.Errorf("context: %w", err)` to add context while preserving the original error.
+* Use `fmt.Errorf("context: %w", err)` to add context while preserving the
+  original error.
 
 ### Checking
 
@@ -96,7 +100,8 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
 
 ### Only test public methods
 
-* Test behavior **via the public API**. If you can’t, that’s a **design smell**—adjust the API or refactor internals.
+* Test behavior **via the public API**. If you can't, that's a **design
+  smell**—adjust the API or refactor internals.
 
 #### **Example (black-box, tests public API only)**
 
@@ -138,7 +143,8 @@ func TestCounter_Add(t *testing.T) {
 }
 ```
 
-> **Don’t do this:** `package counter` tests that call `clamp` directly. If a critical path is hard to reach, refactor.
+> **Don't do this:** `package counter` tests that call `clamp` directly. If a
+> critical path is hard to reach, refactor.
 
 ### Fakes and In-Memory Repositories
 
@@ -147,8 +153,11 @@ func TestCounter_Add(t *testing.T) {
   ```go
   type FakeUserRepo struct { m map[string]*domain.User }
 
-  func (f *FakeUserRepo) GetUser(ctx context.Context, id string) (*domain.User, error) {
-      if u, ok := f.m[id]; ok { return u, nil }
+  func (f *FakeUserRepo) GetUser(ctx context.Context, id string) (
+      *domain.User, error) {
+      if u, ok := f.m[id]; ok {
+          return u, nil
+      }
       return nil, domain.ErrUserNotFound
   }
   ```
@@ -171,7 +180,9 @@ func TestCounter_Add(t *testing.T) {
   for _, tt := range tests {
       t.Run(tt.name, func(t *testing.T) {
           err := svc.DoSomething(tt.input)
-          if !errors.Is(err, tt.wantErr) { t.Fatalf("got %v, want %v", err, tt.wantErr) }
+          if !errors.Is(err, tt.wantErr) {
+              t.Fatalf("got %v, want %v", err, tt.wantErr)
+          }
       })
   }
   ```
@@ -179,7 +190,8 @@ func TestCounter_Add(t *testing.T) {
 ### Golden File Testing
 
 * Use `.golden` files for testing code generation, rendering, or formatting.
-* Keeps expected output separate from test code, and makes large outputs manageable.
+* Keeps expected output separate from test code, and makes large outputs
+  manageable.
 * Example pattern:
 
   ```go
@@ -193,7 +205,8 @@ func TestCounter_Add(t *testing.T) {
       }
       
       if !bytes.Equal(got, want) {
-          t.Errorf("output mismatch\n--- got ---\n%s\n--- want ---\n%s", got, want)
+          t.Errorf("output mismatch\n--- got ---\n%s\n--- want ---\n%s",
+              got, want)
       }
   }
   ```
@@ -217,7 +230,8 @@ func TestCounter_Add(t *testing.T) {
 
 ## Package Structure
 
-A clean package structure helps enforce DIP and keep dependencies flowing in the right direction.
+A clean package structure helps enforce DIP and keep dependencies flowing in
+the right direction.
 
 ### Suggested layout
 
