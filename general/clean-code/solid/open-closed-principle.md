@@ -2,7 +2,9 @@
 
 ## Overview
 
-Software entities should be **open for extension** but **closed for modification**. Add new features by extending behavior, not by changing existing code.
+Software entities should be **open for extension**
+but **closed for modification**. Add new features by extending behavior,
+not by changing existing code.
 
 ## Core Concept
 
@@ -16,18 +18,13 @@ Software entities should be **open for extension** but **closed for modification
 ## Scaffolding
 
 ```typescript
-// Types for discount calculation examples
 interface Product {
-  id: string;
-  name: string;
   price: number;
   category: string;
 }
 
 interface Customer {
-  id: string;
   type: 'regular' | 'premium' | 'vip';
-  joinDate: Date;
 }
 ```
 
@@ -50,21 +47,16 @@ class DiscountCalculator {
     }
     
     // Adding seasonal discounts requires modifying this method
-    const month = new Date().getMonth();
-    if (month === 11) { // December
+    if (new Date().getMonth() === 11) { // December
       discount += 0.15;
-    } else if (month === 6) { // July
-      discount += 0.10;
     }
     
-    // Adding category-based discounts requires modifying this method
+    // Adding category discounts requires modifying this method
     if (product.category === 'electronics') {
       discount += 0.05;
-    } else if (product.category === 'books') {
-      discount += 0.03;
     }
     
-    return Math.min(discount, 0.50); // Cap at 50%
+    return Math.min(discount, 0.50);
   }
 }
 ```
@@ -74,48 +66,30 @@ class DiscountCalculator {
 ## GOOD — Extension through abstraction
 
 ```typescript
-// Define abstraction for discount rules
 interface DiscountRule {
   calculate(customer: Customer, product: Product): number;
 }
 
-// Extend by adding new rule classes
-class CustomerTypeDiscount implements DiscountRule {
-  private readonly discounts = {
-    regular: 0.05,
-    premium: 0.10,
-    vip: 0.20
-  };
+class CustomerDiscount implements DiscountRule {
+  private rates = { regular: 0.05, premium: 0.10, vip: 0.20 };
   
   calculate(customer: Customer): number {
-    return this.discounts[customer.type] || 0;
+    return this.rates[customer.type] || 0;
   }
 }
 
 class SeasonalDiscount implements DiscountRule {
-  private readonly monthlyDiscounts = {
-    6: 0.10,  // July
-    11: 0.15  // December
-  };
-  
   calculate(): number {
-    const month = new Date().getMonth();
-    return this.monthlyDiscounts[month] || 0;
+    return new Date().getMonth() === 11 ? 0.15 : 0;
   }
 }
 
 class CategoryDiscount implements DiscountRule {
-  private readonly categoryDiscounts = {
-    electronics: 0.05,
-    books: 0.03
-  };
-  
   calculate(customer: Customer, product: Product): number {
-    return this.categoryDiscounts[product.category] || 0;
+    return product.category === 'electronics' ? 0.05 : 0;
   }
 }
 
-// Calculator is closed for modification, open for extension
 class DiscountCalculator {
   private rules: DiscountRule[] = [];
   
@@ -124,21 +98,13 @@ class DiscountCalculator {
   }
   
   calculateDiscount(customer: Customer, product: Product): number {
-    const totalDiscount = this.rules.reduce(
+    const total = this.rules.reduce(
       (sum, rule) => sum + rule.calculate(customer, product),
       0
     );
-    return Math.min(totalDiscount, 0.50); // Cap at 50%
+    return Math.min(total, 0.50);
   }
 }
-
-// Usage - extend without modifying existing code
-const calculator = new DiscountCalculator();
-calculator.addRule(new CustomerTypeDiscount());
-calculator.addRule(new SeasonalDiscount());
-calculator.addRule(new CategoryDiscount());
-// Easy to add new rules without touching calculator or existing rules
-// calculator.addRule(new BlackFridayDiscount());
 ```
 
 ---

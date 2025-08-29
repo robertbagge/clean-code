@@ -2,7 +2,10 @@
 
 ## Overview
 
-High-level modules should not depend on low-level modules. Both should depend on abstractions. This inverts traditional dependency flow, making systems more flexible and testable.
+High-level modules should not depend on low-level modules.
+Both should depend on abstractions.
+This inverts traditional dependency flow, making systems
+more flexible and testable.
 
 ## Core Concept
 
@@ -16,17 +19,10 @@ High-level modules should not depend on low-level modules. Both should depend on
 ## Scaffolding
 
 ```typescript
-// Domain types for examples
 interface Order {
   id: string;
-  items: Array<{ productId: string; quantity: number }>;
   total: number;
-  customerEmail: string;
-}
-
-interface NotificationResult {
-  success: boolean;
-  messageId?: string;
+  email: string;
 }
 ```
 
@@ -35,54 +31,32 @@ interface NotificationResult {
 ## BAD — Direct dependency on concrete implementations
 
 ```typescript
-// High-level business logic directly depends on low-level details
 class OrderService {
   private database: PostgreSQLDatabase;
   private emailer: GmailService;
   
   constructor() {
     // Creating concrete dependencies inside high-level module
-    this.database = new PostgreSQLDatabase('localhost', 5432);
-    this.emailer = new GmailService('smtp.gmail.com', 587);
+    this.database = new PostgreSQLDatabase();
+    this.emailer = new GmailService();
   }
   
   async processOrder(order: Order): Promise<void> {
-    // Business logic tied to PostgreSQL specifics
-    const connection = await this.database.connect();
-    await connection.query(
-      'INSERT INTO orders (id, total, email) VALUES ($1, $2, $3)',
-      [order.id, order.total, order.customerEmail]
-    );
-    
-    // Business logic tied to Gmail specifics
-    await this.emailer.authenticate('user@gmail.com', 'password');
-    await this.emailer.sendEmail({
-      to: order.customerEmail,
-      subject: 'Order Confirmation',
-      body: `Your order ${order.id} has been processed`
-    });
+    // Business logic tied to concrete implementations
+    await this.database.query('INSERT INTO orders...', [order.id]);
+    await this.emailer.sendEmail(order.email, 'Order confirmed');
   }
 }
 
-// Low-level modules (concrete implementations)
 class PostgreSQLDatabase {
-  constructor(private host: string, private port: number) {}
-  
-  async connect() {
-    // PostgreSQL specific connection logic
-    return pgClient.connect(this.host, this.port);
+  async query(sql: string, params: any[]): Promise<void> {
+    // PostgreSQL specific code
   }
 }
 
 class GmailService {
-  constructor(private smtp: string, private port: number) {}
-  
-  async authenticate(user: string, pass: string) {
-    // Gmail specific auth
-  }
-  
-  async sendEmail(details: any) {
-    // Gmail specific sending
+  async sendEmail(to: string, message: string): Promise<void> {
+    // Gmail specific code
   }
 }
 ```
@@ -92,114 +66,46 @@ class GmailService {
 ## GOOD — Both depend on abstractions
 
 ```typescript
-// Define abstractions (interfaces) that high-level code needs
+// High-level code defines interfaces it needs
 interface OrderRepository {
   save(order: Order): Promise<void>;
-  findById(id: string): Promise<Order | null>;
 }
 
 interface NotificationService {
-  notify(recipient: string, message: string): Promise<NotificationResult>;
+  notify(email: string, message: string): Promise<void>;
 }
 
 // High-level module depends on abstractions
 class OrderService {
   constructor(
-    private repository: OrderRepository,  // Abstraction
-    private notifier: NotificationService  // Abstraction
+    private repository: OrderRepository,
+    private notifier: NotificationService
   ) {}
   
   async processOrder(order: Order): Promise<void> {
-    // Business logic uses abstractions, not concrete implementations
+    // Business logic uses abstractions
     await this.repository.save(order);
-    
-    const result = await this.notifier.notify(
-      order.customerEmail,
-      `Your order ${order.id} has been processed`
-    );
-    
-    if (!result.success) {
-      throw new Error('Failed to send notification');
-    }
+    await this.notifier.notify(order.email, 'Order confirmed');
   }
 }
 
 // Low-level modules implement the abstractions
 class PostgreSQLOrderRepository implements OrderRepository {
-  constructor(private connectionString: string) {}
-  
   async save(order: Order): Promise<void> {
-    const client = await pg.connect(this.connectionString);
-    await client.query(
-      'INSERT INTO orders (id, total, email) VALUES ($1, $2, $3)',
-      [order.id, order.total, order.customerEmail]
-    );
-  }
-  
-  async findById(id: string): Promise<Order | null> {
-    const client = await pg.connect(this.connectionString);
-    const result = await client.query('SELECT * FROM orders WHERE id = $1', [id]);
-    return result.rows[0] || null;
-  }
-}
-
-class MongoOrderRepository implements OrderRepository {
-  constructor(private uri: string) {}
-  
-  async save(order: Order): Promise<void> {
-    const client = await MongoClient.connect(this.uri);
-    await client.db('shop').collection('orders').insertOne(order);
-  }
-  
-  async findById(id: string): Promise<Order | null> {
-    const client = await MongoClient.connect(this.uri);
-    return await client.db('shop').collection('orders').findOne({ id });
+    await db.query('INSERT INTO orders...', [order.id, order.total]);
   }
 }
 
 class EmailNotificationService implements NotificationService {
-  constructor(private apiKey: string) {}
-  
-  async notify(recipient: string, message: string): Promise<NotificationResult> {
-    const response = await emailApi.send({
-      to: recipient,
-      subject: 'Order Update',
-      body: message,
-      apiKey: this.apiKey
-    });
-    
-    return {
-      success: response.status === 200,
-      messageId: response.messageId
-    };
-  }
-}
-
-class SmsNotificationService implements NotificationService {
-  constructor(private accountSid: string, private authToken: string) {}
-  
-  async notify(recipient: string, message: string): Promise<NotificationResult> {
-    const response = await smsClient.messages.create({
-      to: recipient,
-      body: message
-    });
-    
-    return {
-      success: !!response.sid,
-      messageId: response.sid
-    };
+  async notify(email: string, message: string): Promise<void> {
+    await emailClient.send(email, message);
   }
 }
 
 // Dependency injection - easy to swap implementations
-const repository = new PostgreSQLOrderRepository('postgresql://localhost/shop');
-const notifier = new EmailNotificationService('api-key-123');
-const orderService = new OrderService(repository, notifier);
-
-// Testing is simple with test doubles
-const testRepo = new InMemoryOrderRepository();
-const testNotifier = new MockNotificationService();
-const testService = new OrderService(testRepo, testNotifier);
+const repository = new PostgreSQLOrderRepository();
+const notifier = new EmailNotificationService();
+const service = new OrderService(repository, notifier);
 ```
 
 ---

@@ -16,20 +16,11 @@ A class/module/function should have **one reason to change**. This improves test
 ## Scaffolding
 
 ```typescript
-// Domain types and helpers for examples
 interface User {
   id: string;
   email: string;
   name: string;
 }
-
-interface EmailMessage {
-  to: string;
-  subject: string;
-  body: string;
-}
-
-class ValidationError extends Error {}
 ```
 
 ---
@@ -39,28 +30,19 @@ class ValidationError extends Error {}
 ```typescript
 class UserService {
   async createUser(email: string, name: string): Promise<User> {
-    // Validation logic mixed in
-    if (!email.includes('@')) {
-      throw new ValidationError('Invalid email');
-    }
-    if (name.length < 2) {
-      throw new ValidationError('Name too short');
-    }
+    // Validation mixed in
+    if (!email.includes('@')) throw new Error('Invalid email');
+    if (name.length < 2) throw new Error('Name too short');
     
     // Database operations mixed in
     const user = { id: Date.now().toString(), email, name };
     await db.query('INSERT INTO users VALUES (?, ?, ?)', [user.id, email, name]);
     
     // Email sending mixed in
-    const smtp = await connectSmtp('smtp.example.com', 587);
-    await smtp.send({
-      to: email,
-      subject: 'Welcome!',
-      body: `Hi ${name}, welcome to our service!`
-    });
+    await emailClient.send(email, 'Welcome!', `Hi ${name}!`);
     
-    // Audit logging mixed in
-    await fs.appendFile('audit.log', `User created: ${user.id}\n`);
+    // Logging mixed in
+    console.log(`User created: ${user.id}`);
     
     return user;
   }
@@ -72,15 +54,10 @@ class UserService {
 ## GOOD — Separated concerns
 
 ```typescript
-// Each class has one responsibility
 class UserValidator {
   validate(email: string, name: string): void {
-    if (!email.includes('@')) {
-      throw new ValidationError('Invalid email');
-    }
-    if (name.length < 2) {
-      throw new ValidationError('Name too short');
-    }
+    if (!email.includes('@')) throw new Error('Invalid email');
+    if (name.length < 2) throw new Error('Name too short');
   }
 }
 
@@ -91,29 +68,17 @@ class UserRepository {
   }
 }
 
-class EmailService {
+class NotificationService {
   async sendWelcome(user: User): Promise<void> {
-    await this.smtp.send({
-      to: user.email,
-      subject: 'Welcome!',
-      body: `Hi ${user.name}, welcome to our service!`
-    });
+    await emailClient.send(user.email, 'Welcome!', `Hi ${user.name}!`);
   }
 }
 
-class AuditLogger {
-  async logUserCreation(userId: string): Promise<void> {
-    await fs.appendFile('audit.log', `User created: ${userId}\n`);
-  }
-}
-
-// Orchestrator coordinates single-purpose services
 class UserService {
   constructor(
     private validator: UserValidator,
     private repository: UserRepository,
-    private emailService: EmailService,
-    private logger: AuditLogger
+    private notifications: NotificationService
   ) {}
 
   async createUser(email: string, name: string): Promise<User> {
@@ -121,8 +86,7 @@ class UserService {
     
     const user = { id: Date.now().toString(), email, name };
     await this.repository.save(user);
-    await this.emailService.sendWelcome(user);
-    await this.logger.logUserCreation(user.id);
+    await this.notifications.sendWelcome(user);
     
     return user;
   }
@@ -134,7 +98,8 @@ class UserService {
 ## Anti-patterns to Avoid
 
 1. **God classes** that handle everything from UI to database
-2. **Business logic mixed with infrastructure** (e.g., validation in database layer)
+2. **Business logic mixed with infrastructure**
+(e.g., validation in database layer)
 3. **Multiple reasons to change** in a single module
 
 ---
@@ -144,5 +109,6 @@ class UserService {
 - Give each class/function **one clear purpose**
 - Separate **validation, persistence, messaging, and logging**
 - Test each responsibility **independently** with focused unit tests
-- Changes become **localized** - modify email logic without touching user creation
-- Code becomes **reusable** - use EmailService for other notifications
+- Changes become **localized** - modify email logic
+without touching user creation
+- Code becomes **reusable** - use NotificationService for other features

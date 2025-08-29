@@ -2,7 +2,10 @@
 
 ## Overview
 
-Subtypes must be substitutable for their base types without altering correctness. If S is a subtype of T, objects of type T should be replaceable with objects of type S without breaking the program.
+Subtypes must be substitutable for their base types without
+altering correctness. If S is a subtype of T, objects of
+type T should be replaceable with objects of type S
+without breaking the program.
 
 ## Core Concept
 
@@ -16,16 +19,13 @@ Subtypes must be substitutable for their base types without altering correctness
 ## Scaffolding
 
 ```typescript
-// Types for payment processing examples
-interface PaymentResult {
-  success: boolean;
-  transactionId?: string;
-  errorMessage?: string;
-}
-
 interface Account {
   balance: number;
-  frozen: boolean;
+}
+
+interface PaymentResult {
+  success: boolean;
+  message: string;
 }
 ```
 
@@ -37,47 +37,34 @@ interface Account {
 class PaymentProcessor {
   processPayment(amount: number, account: Account): PaymentResult {
     if (account.balance >= amount) {
-      account.balance -= amount;
-      return { success: true, transactionId: this.generateId() };
+      account.balance -= amount; // Always deducts immediately
+      return { success: true, message: 'Payment completed' };
     }
-    return { success: false, errorMessage: 'Insufficient funds' };
-  }
-  
-  protected generateId(): string {
-    return Date.now().toString();
+    return { success: false, message: 'Insufficient funds' };
   }
 }
 
-class RefundablePaymentProcessor extends PaymentProcessor {
+class DelayedPaymentProcessor extends PaymentProcessor {
   processPayment(amount: number, account: Account): PaymentResult {
-    // VIOLATION: Parent succeeds with sufficient balance,
-    // but child adds extra precondition
-    if (account.frozen) {
-      throw new Error('Cannot process payment on frozen account');
-    }
-    
-    // VIOLATION: Parent deducts immediately,
-    // but child only reserves funds
+    // VIOLATION: Changes behavior - doesn't actually deduct funds
     if (account.balance >= amount) {
-      // Different behavior - doesn't actually deduct!
-      this.reserveFunds(account, amount);
-      return { success: true, transactionId: 'PENDING_' + this.generateId() };
+      this.schedulePayment(amount, account); // Just schedules!
+      return { success: true, message: 'Payment scheduled' };
     }
-    return { success: false, errorMessage: 'Insufficient funds' };
+    return { success: false, message: 'Insufficient funds' };
   }
   
-  private reserveFunds(account: Account, amount: number): void {
-    // Just marks as pending, doesn't deduct
+  private schedulePayment(amount: number, account: Account): void {
+    // Funds not actually deducted
   }
 }
 
-// Client code expects consistent behavior
+// Client code expects funds to be deducted
 function processOrder(processor: PaymentProcessor, account: Account): void {
   const result = processor.processPayment(100, account);
   
   if (result.success) {
-    // Assumes payment is complete and funds are deducted
-    shipProduct(); // But RefundablePaymentProcessor didn't actually charge!
+    shipProduct(); // Ships immediately but DelayedProcessor didn't actually charge!
   }
 }
 ```
@@ -87,105 +74,48 @@ function processOrder(processor: PaymentProcessor, account: Account): void {
 ## GOOD — Preserving contracts
 
 ```typescript
-// Define clear abstractions with consistent contracts
 interface PaymentStrategy {
   canProcess(account: Account): boolean;
   execute(amount: number, account: Account): PaymentResult;
 }
 
-class StandardPayment implements PaymentStrategy {
+class ImmediatePayment implements PaymentStrategy {
   canProcess(account: Account): boolean {
-    return !account.frozen;
+    return account.balance >= 0;
   }
   
   execute(amount: number, account: Account): PaymentResult {
     if (account.balance >= amount) {
       account.balance -= amount;
-      return { 
-        success: true, 
-        transactionId: Date.now().toString() 
-      };
+      return { success: true, message: 'Payment completed' };
     }
-    return { 
-      success: false, 
-      errorMessage: 'Insufficient funds' 
-    };
+    return { success: false, message: 'Insufficient funds' };
   }
 }
 
-class RefundablePayment implements PaymentStrategy {
-  private refundWindow = 30; // days
-  
+class CreditPayment implements PaymentStrategy {
   canProcess(account: Account): boolean {
-    return !account.frozen;
+    return true; // Credit allows negative balance
   }
   
   execute(amount: number, account: Account): PaymentResult {
-    if (account.balance >= amount) {
-      // Still deducts immediately, maintaining contract
-      account.balance -= amount;
-      const transactionId = Date.now().toString();
-      
-      // Additional capability: stores refund eligibility
-      this.storeRefundEligibility(transactionId, this.refundWindow);
-      
-      return { success: true, transactionId };
-    }
-    return { 
-      success: false, 
-      errorMessage: 'Insufficient funds' 
-    };
-  }
-  
-  private storeRefundEligibility(id: string, days: number): void {
-    // Store refund window metadata
+    account.balance -= amount; // Still deducts, maintaining contract
+    return { success: true, message: 'Payment completed on credit' };
   }
 }
 
-// Separate concern for deferred payments
-class DeferredPayment implements PaymentStrategy {
-  canProcess(account: Account): boolean {
-    // Clearly different contract, not a subtype
-    return !account.frozen && account.balance >= 0;
-  }
-  
-  execute(amount: number, account: Account): PaymentResult {
-    // Different behavior is explicit via interface choice
-    if (this.canSchedule(account, amount)) {
-      const reservationId = this.reserveFunds(account, amount);
-      return { 
-        success: true, 
-        transactionId: 'DEFERRED_' + reservationId 
-      };
-    }
-    return { 
-      success: false, 
-      errorMessage: 'Cannot schedule payment' 
-    };
-  }
-  
-  private canSchedule(account: Account, amount: number): boolean {
-    return account.balance >= amount * 0.1; // 10% reserve
-  }
-  
-  private reserveFunds(account: Account, amount: number): string {
-    // Reserve logic
-    return Date.now().toString();
-  }
+// Separate interface for scheduling - different contract entirely
+interface PaymentScheduler {
+  schedule(amount: number, account: Account): PaymentResult;
 }
 
-// Client code works consistently with any strategy
 class PaymentProcessor {
   constructor(private strategy: PaymentStrategy) {}
   
   processPayment(amount: number, account: Account): PaymentResult {
     if (!this.strategy.canProcess(account)) {
-      return { 
-        success: false, 
-        errorMessage: 'Account cannot be processed' 
-      };
+      return { success: false, message: 'Payment method unavailable' };
     }
-    
     return this.strategy.execute(amount, account);
   }
 }
