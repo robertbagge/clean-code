@@ -3,6 +3,7 @@
 These docs help you make pragmatic Go design choices. If you only read one thing, read **Dependency Inversion (DIP)**.
 
 ## Why lead with DIP?
+
 - **Testability:** Inject fakes/in-memory deps.
 - **Portability:** Swap drivers (SQL/Mongo/HTTP) without touching business logic.
 - **Boundaries:** Consumers define interfaces; providers implement them.
@@ -58,4 +59,5 @@ These docs help you make pragmatic Go design choices. If you only read one thing
 - **KISS:** Simplest thing that works; avoid premature abstraction.
 
 ## Check yourself before you wreck yourself
+
 Use the quick [design-checklist.md](./design-checklist.md) before shipping.
