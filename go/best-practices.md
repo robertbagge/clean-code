@@ -23,6 +23,7 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
       return nil
   }
   ```
+
 * **Named interfaces** should be used when:
 
   * The same contract is needed in multiple places
@@ -41,6 +42,7 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
       CreateUser(ctx context.Context, u *domain.User) error
   }
   ```
+
 * **Providers (infra packages)** should expose concrete types only.
   They just *happen* to implement consumer-defined interfaces.
 * **Exception:** If an interface is so generic and broadly useful (e.g. `io.Reader`), define it in a shared package. But this is rare.
@@ -88,7 +90,6 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
 
 * Use `errors.Is` and `errors.As` for comparisons and unwrapping.
 
-
 ---
 
 ## Testing Practices
@@ -97,7 +98,7 @@ It complements the [Clean Code-focused docs](./clean-code/) (e.g. DIP, ISP, DRY)
 
 * Test behavior **via the public API**. If you can’t, that’s a **design smell**—adjust the API or refactor internals.
 
-**Example (black-box, tests public API only)**
+#### **Example (black-box, tests public API only)**
 
 `counter/counter.go`
 
@@ -111,9 +112,9 @@ func (c *Counter) Add(delta int)    { c.n += clamp(delta) }
 func (c *Counter) Value() int       { return c.n }
 
 func clamp(x int) int { // unexported: not tested directly
-	if x < -1000 { return -1000 }
-	if x > 1000  { return 1000 }
-	return x
+ if x < -1000 { return -1000 }
+ if x > 1000  { return 1000 }
+ return x
 }
 ```
 
@@ -123,17 +124,17 @@ func clamp(x int) int { // unexported: not tested directly
 package counter_test
 
 import (
-	"testing"
+ "testing"
 
-	"example.com/project/counter"
+ "example.com/project/counter"
 )
 
 func TestCounter_Add(t *testing.T) {
-	c := counter.New()
-	c.Add(5000)     // exercises upper clamp through public API
-	if got := c.Value(); got != 1000 {
-		t.Fatalf("Value()=%d, want 1000", got)
-	}
+ c := counter.New()
+ c.Add(5000)     // exercises upper clamp through public API
+ if got := c.Value(); got != 1000 {
+  t.Fatalf("Value()=%d, want 1000", got)
+ }
 }
 ```
 
@@ -151,6 +152,7 @@ func TestCounter_Add(t *testing.T) {
       return nil, domain.ErrUserNotFound
   }
   ```
+
 * Keeps tests fast and realistic.
 
 ### Table-Driven Tests
@@ -195,6 +197,7 @@ func TestCounter_Add(t *testing.T) {
       }
   }
   ```
+
 * Tip: add a `-update` flag to rewrite golden files when expectations change:
 
   ```go
@@ -212,14 +215,13 @@ func TestCounter_Add(t *testing.T) {
 
 ---
 
-
 ## Package Structure
 
 A clean package structure helps enforce DIP and keep dependencies flowing in the right direction.
 
 ### Suggested layout
 
-```
+```txt
 /domain
     user.go         // domain model (User struct)
     errors.go       // domain-level errors (ErrUserNotFound, ErrEmailTaken)
@@ -264,6 +266,7 @@ A clean package structure helps enforce DIP and keep dependencies flowing in the
          return nil, domain.ErrUserNotFound
      }
      ```
+
    * Never leak driver-specific errors to service or domain.
 
 4. **Dependency direction**

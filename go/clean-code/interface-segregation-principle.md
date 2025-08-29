@@ -276,4 +276,4 @@ func (f fakeReader) GetUser(ctx context.Context, id string) (*User, error) {
 ## Related Best Practices
 
 For package structure, error placement, and testing strategies, etc., see
-👉 [best-practices.md](../../best-practices.md)
+👉 [best-practices.md](../best-practices.md)

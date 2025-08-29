@@ -180,7 +180,7 @@ func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-**Why this is SRP-friendly**
+### Why this is SRP-friendly
 
 * `ParseProductFilter` only parses/validates **HTTP inputs**.
 * `ProductService` holds **business rules**.
@@ -234,4 +234,4 @@ func (f *FakeRepo) Find(ctx context.Context, _ ProductFilter) ([]Product, error)
 ## Related Best Practices
 
 For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
-👉 **[best-practices.md](./best-practices.md)**
+👉 **[best-practices.md](../best-practices.md)**

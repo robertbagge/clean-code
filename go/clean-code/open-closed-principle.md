@@ -1,7 +1,3 @@
-Awesome—here’s OCP with the same “agent-friendly” treatment as your ISP/DIP/LSP docs: tight overview, one BAD vs one GOOD example, tiny scaffolding so snippets compile, plus a lightweight plugin registration pattern and a minimal test harness. Concise, copy-pasteable.
-
----
-
 # Open/Closed Principle (OCP) in Go
 
 ## Overview
@@ -189,4 +185,4 @@ func (f *FakeNotifier) Send(ctx context.Context, m string) error {
 ## Related Best Practices
 
 For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
-👉 **[best-practices.md](./best-practices.md)**
+👉 **[best-practices.md](../best-practices.md)**

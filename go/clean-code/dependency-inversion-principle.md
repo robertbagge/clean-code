@@ -84,7 +84,6 @@ func (u *UserService) CreateUser(name, email string) error {
 ### GOOD — Abstraction-Based (DIP compliant)
 
 > High-level code declares the behavior it needs; low-level code implements it.
-
 > Note: The **UserRepository** interface lives alongside the **UserService** (the consumer). Concrete repos (**SQLUserRepository**, **InMemoryUserRepository**, etc.) just implement it, without importing the service package. This follows Go’s convention: consumers define interfaces, providers implement them.
 
 ```go
@@ -238,14 +237,14 @@ func EnsureUserExists(
 
 ## When to Apply DIP in Go
 
-### Use DIP for:
+### Use DIP for
 
 * External dependencies (databases, APIs, file systems)
 * Business logic that needs to be testable
 * Components that might change or have multiple implementations
 * Cross-cutting concerns (logging, metrics, tracing)
 
-### Prefer Concrete Types for:
+### Prefer Concrete Types for
 
 * DTOs / domain models (data)
 * Configuration structures
@@ -298,4 +297,4 @@ type Config struct {
 ## Related Best Practices
 
 For package structure, error placement, and testing strategies, etc., see
-👉 [best-practices.md](../../best-practices.md)
+👉 [best-practices.md](../best-practices.md)

@@ -187,7 +187,7 @@ func (uc *UserController) UpdateProfile(ctx context.Context, u UserData, w http.
 }
 ```
 
-**Why this is DRY**
+### Why this is DRY
 
 * All rules live in **one place** (`Validator` + constants).
 * **Create vs update** uses a **policy**, not duplicated branches.
@@ -206,14 +206,14 @@ func (uc *UserController) UpdateProfile(ctx context.Context, u UserData, w http.
 
 ## Go-Specific DRY Techniques
 
-1. **Interfaces for shared behavior**
+### **Interfaces for shared behavior**
 
 ```go
 type Validatable interface{ Validate(context.Context) error }
 func ValidateAny(ctx context.Context, v Validatable) error { return v.Validate(ctx) }
 ```
 
-2. **Embedding common fields**
+### **Embedding common fields**
 
 ```go
 type BaseEntity struct {
@@ -225,7 +225,7 @@ type User struct {
 }
 ```
 
-3. **Generics for reusable helpers** (Go 1.18+)
+### **Generics for reusable helpers** (Go 1.18+)
 
 ```go
 func FindByID[T any](xs []T, want string, idOf func(T) string) *T {
@@ -236,7 +236,7 @@ func FindByID[T any](xs []T, want string, idOf func(T) string) *T {
 }
 ```
 
-4. **Centralized configuration/constants**
+### **Centralized configuration/constants**
 
 * Put thresholds, fees, hosts, etc., in one config/consts module.
 * Map **driver errors → domain errors** in one place.
@@ -256,4 +256,4 @@ func FindByID[T any](xs []T, want string, idOf func(T) string) *T {
 ## Related Best Practices
 
 For package structure, where to define interfaces, error placement, and testing patterns (fakes, table-driven tests, golden files), see
-👉 **[best-practices.md](./best-practices.md)**
+👉 **[best-practices.md](../best-practices.md)**
