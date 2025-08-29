@@ -13,9 +13,9 @@ not by changing existing code.
 - New requirements = new code, not modified code
 - Use polymorphism to handle variations
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface Product {
@@ -28,9 +28,7 @@ interface Customer {
 }
 ```
 
----
-
-## BAD — Modification for each new feature
+### BAD — Modification for each new feature
 
 ```typescript
 class DiscountCalculator {
@@ -61,9 +59,7 @@ class DiscountCalculator {
 }
 ```
 
----
-
-## GOOD — Extension through abstraction
+### GOOD — Extension through abstraction
 
 ```typescript
 interface DiscountRule {

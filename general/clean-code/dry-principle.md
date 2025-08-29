@@ -13,9 +13,9 @@ Duplication leads to inconsistency and maintenance nightmares.
 - Configuration and constants in one place
 - Applies to code, schemas, documentation
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface Product {
@@ -28,9 +28,7 @@ interface Customer {
 }
 ```
 
----
-
-## BAD — Duplicated logic across methods
+### BAD — Duplicated logic across methods
 
 ```typescript
 class PricingService {
@@ -78,9 +76,7 @@ class PricingService {
 }
 ```
 
----
-
-## GOOD — Single source of truth
+### GOOD — Single source of truth
 
 ```typescript
 class PricingService {
@@ -125,15 +121,11 @@ class PricingService {
 }
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **Copy-paste programming** instead of extracting functions
 2. **Magic numbers** scattered throughout code
 3. **Duplicate validation logic** across endpoints
-
----
 
 ## Key Takeaways
 

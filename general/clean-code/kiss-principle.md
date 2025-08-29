@@ -12,9 +12,9 @@ The simplest solution that works is usually the best solution.
 - Avoid premature optimization
 - The best code is code that others can understand
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface User {
@@ -31,9 +31,7 @@ type SearchCriteria = {
 };
 ```
 
----
-
-## BAD — Over-engineered solution
+### BAD — Over-engineered solution
 
 ```typescript
 abstract class Filter<T> {
@@ -82,9 +80,7 @@ class UserSearchService {
 }
 ```
 
----
-
-## GOOD — Simple and direct
+### GOOD — Simple and direct
 
 ```typescript
 class UserSearchService {
@@ -133,15 +129,11 @@ function validateUser(user: Partial<User>): string[] {
 }
 ```
 
----
-
 ## Anti-patterns to Avoid
 
 1. **Premature abstraction** for simple problems
 2. **Clever one-liners** that sacrifice readability
 3. **Over-engineering** with unnecessary design patterns
-
----
 
 ## Key Takeaways
 

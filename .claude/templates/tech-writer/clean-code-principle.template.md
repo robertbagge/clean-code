@@ -13,19 +13,21 @@ clarity, or extensibility.]
 
 - [Short bullets capturing the essence; 3–5 items max.]
 
-## Scaffolding (optional; so snippets compile)
+## Example
+
+### Scaffolding (optional; so snippets compile)
 
 ```[language]
 [Only include if needed: types, sentinel errors, tiny helpers.]
 ````
 
-## BAD — \[Short label of the smell]
+### BAD — \[Short label of the smell]
 
 ```[language]
 [Minimal but realistic anti-example. No filler. Inline comments only where helpful.]
 ```
 
-## GOOD — \[Short label of the fix]
+### GOOD — \[Short label of the fix]
 
 ```[language]
 [The corrected approach. Show the contract & how it’s honored.]

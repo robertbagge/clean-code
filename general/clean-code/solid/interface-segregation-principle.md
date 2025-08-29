@@ -12,17 +12,15 @@ Many small, focused interfaces are better than one large interface.
 - Prefer role-based interfaces over header interfaces
 - Compose multiple interfaces when needed
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 type DocumentContent = string;
 ```
 
----
-
-## BAD — Fat interface forcing unwanted implementations
+### BAD — Fat interface forcing unwanted implementations
 
 ```typescript
 interface DocumentProcessor {
@@ -57,9 +55,7 @@ class SimpleTextFile implements DocumentProcessor {
 }
 ```
 
----
-
-## GOOD — Segregated, focused interfaces
+### GOOD — Segregated, focused interfaces
 
 ```typescript
 interface Readable {

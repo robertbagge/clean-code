@@ -8,11 +8,21 @@
 
 - [3–5 bullets max.]
 
-## Example 1 — BAD → GOOD
+## Example
+
+### Scaffolding (Optional if required to make example run)
+
+```[language]
+[scaffolding]
+```
+
+### BAD - [Reason]
 
 ```[language]
 [bad]
-````
+```
+
+### GOOD - [Reason]
 
 ```[language]
 [good]

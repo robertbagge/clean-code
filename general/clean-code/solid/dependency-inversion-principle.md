@@ -14,9 +14,9 @@ more flexible and testable.
 - Low-level code implements those interfaces
 - Use dependency injection to provide implementations
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface Order {
@@ -26,9 +26,7 @@ interface Order {
 }
 ```
 
----
-
-## BAD — Direct dependency on concrete implementations
+### BAD — Direct dependency on concrete implementations
 
 ```typescript
 class OrderService {
@@ -61,9 +59,7 @@ class GmailService {
 }
 ```
 
----
-
-## GOOD — Both depend on abstractions
+### GOOD — Both depend on abstractions
 
 ```typescript
 // High-level code defines interfaces it needs
@@ -107,8 +103,6 @@ const repository = new PostgreSQLOrderRepository();
 const notifier = new EmailNotificationService();
 const service = new OrderService(repository, notifier);
 ```
-
----
 
 ## Anti-patterns to Avoid
 

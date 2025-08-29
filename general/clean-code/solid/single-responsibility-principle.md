@@ -12,9 +12,9 @@ testability, reduces coupling, and makes code easier to understand and maintain.
 - High cohesion within modules, low coupling between them
 - Separate different concerns into different modules
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface User {
@@ -24,9 +24,7 @@ interface User {
 }
 ```
 
----
-
-## BAD — Mixed responsibilities
+### BAD — Mixed responsibilities
 
 ```typescript
 class UserService {
@@ -50,9 +48,7 @@ class UserService {
 }
 ```
 
----
-
-## GOOD — Separated concerns
+### GOOD — Separated concerns
 
 ```typescript
 class UserValidator {
@@ -93,8 +89,6 @@ class UserService {
   }
 }
 ```
-
----
 
 ## Anti-patterns to Avoid
 

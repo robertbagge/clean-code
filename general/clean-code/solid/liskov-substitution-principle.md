@@ -14,9 +14,9 @@ without breaking the program.
 - Preserve expected behavior, not just method signatures
 - Avoid type checking to determine behavior
 
----
+## Example
 
-## Scaffolding
+### Scaffolding
 
 ```typescript
 interface Account {
@@ -29,9 +29,7 @@ interface PaymentResult {
 }
 ```
 
----
-
-## BAD — Breaking behavioral contracts
+### BAD — Breaking behavioral contracts
 
 ```typescript
 class PaymentProcessor {
@@ -69,9 +67,7 @@ function processOrder(processor: PaymentProcessor, account: Account): void {
 }
 ```
 
----
-
-## GOOD — Preserving contracts
+### GOOD — Preserving contracts
 
 ```typescript
 interface PaymentStrategy {
