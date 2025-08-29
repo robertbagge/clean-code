@@ -86,6 +86,8 @@ class CategoryDiscount implements DiscountRule {
   }
 }
 
+// This is a simplified example. Futher rule management logic
+// is required
 class DiscountCalculator {
   private rules: DiscountRule[] = [];
   

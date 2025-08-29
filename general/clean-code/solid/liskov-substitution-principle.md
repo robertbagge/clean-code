@@ -45,6 +45,8 @@ class PaymentProcessor {
 class DelayedPaymentProcessor extends PaymentProcessor {
   processPayment(amount: number, account: Account): PaymentResult {
     // VIOLATION: Changes behavior - doesn't actually deduct funds
+    // This violates the postcodition contract that processPayment
+    // should actually process the payment when returning success.
     if (account.balance >= amount) {
       this.schedulePayment(amount, account); // Just schedules!
       return { success: true, message: 'Payment scheduled' };
