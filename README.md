@@ -13,7 +13,7 @@ clean code can be drawn from.
 ## How to use this repo from another codebase
 
 - Locate the target language you are working in and find that folder.
-- If you can't find your language, [general](general/) is a good place to start
+- If you can't find your language, [general/](general/) is a good place to start
   for cross-language patterns.
 - Cite the example path you used (e.g., in a PR description) to make provenance clear.
 
