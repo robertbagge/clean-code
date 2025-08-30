@@ -17,6 +17,7 @@ In React, DIP means:
 * Hooks declare the contracts they need
 * Keep API/database details out of components
 * Use dependency injection for testability
+* Allows separation of concerns which great for using business/persistence logic for different platforms - Web/React Native etc.
 
 ## Implementation Examples
 
@@ -41,31 +42,30 @@ class UserNotFoundError extends Error {
     super(`User ${userId} not found`)
   }
 }
-
 ```
 
-### BAD - Component handles complete/error actions on it's own
+### BAD - Component handles complete/error actions on its own
 
 ```typescript
 function FeedbackForm() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const { sendFeedback } = useFeedback();
-  
+  const { sendFeedback } = useFeedback()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       await sendFeedback(title, description)
-      
+
       // VIOLATION: UI component decides next UI state
       window.location.href = '/dashboard'
-    } catch (err) {
+    } catch (error) {
       // VIOLATION: UI component handles error
-      console.error('Send feedback failed:', err)
+      console.error('Send feedback failed:', error)
     }
   }
-  
+
   return (
     <form onSubmit={handleSubmit}>
       {/* form fields */}
@@ -78,27 +78,26 @@ function FeedbackForm() {
 
 ```typescript
 type Props = {
-  onFeedbackSent: ({estimatedResponseTime: string}) => void
-  onFeedbackError: (Error) => void
+  onFeedbackSent: (args: { estimatedResponseTime: string }) => void
+  onFeedbackError: (error: Error) => void
 }
 
-function FeedbackForm({onFeedbackSent, onFeedbackError}: Props) {
+function FeedbackForm({ onFeedbackSent, onFeedbackError }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const { sendFeedback } = useFeedback();
-  
+  const { sendFeedback } = useFeedback()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
       const { estimatedResponseTime } = await sendFeedback(title, description)
-      
-      onFeedbackSent({estimatedResponseTime})
-    } catch (err) {
-      onFeedbackError(error)
+      onFeedbackSent({ estimatedResponseTime })
+    } catch (error) {
+      onFeedbackError(error instanceof Error ? error : new Error('Unknown error'))
     }
   }
-  
+
   return (
     <form onSubmit={handleSubmit}>
       {/* form fields */}
@@ -109,37 +108,56 @@ function FeedbackForm({onFeedbackSent, onFeedbackError}: Props) {
 function FeedbackSection() {
   const { toast } = useToast()
 
-  const onFeedbackSent = ({estimatedResponseTime: string}) => {
+  const onFeedbackSent = ({ estimatedResponseTime }: { estimatedResponseTime: string }) => {
     toast.success(`Feedback sent - we will respond in ${estimatedResponseTime}`)
   }
-  const onFeedbackError = (error) => {
+  const onFeedbackError = (error: Error) => {
     toast.error('Could not send feedback')
-    // Throw error again to let higher error boundary (like sentry) handle
-    throw error
+    // Optionally bubble to an error boundary
+    // throw error
   }
 
-  return <>
-    <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError}>
-  <>
+  return (
+    <>
+      <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError} />
+    </>
+  )
 }
-
 ```
 
-#### The good pattern allows us for behavioural testing with injection
+#### Feedback context for injection (no `jest.mock` needed)
 
 ```typescript
+// feedback-context.tsx (app code)
+import React, { createContext } from 'react'
+
+type FeedbackResult = { estimatedResponseTime: string }
+type FeedbackAPI = { sendFeedback: (title: string, description: string) => Promise<FeedbackResult> }
+
+export const FeedbackContext = createContext<FeedbackAPI | null>(null)
+export const FeedbackProvider = FeedbackContext.Provider
+
+export function useFeedback(): FeedbackAPI {
+  const api = React.useContext(FeedbackContext)
+  if (!api) throw new Error('useFeedback must be used within FeedbackProvider')
+  return api
+}
+```
+
+#### Testing the GOOD pattern (behavioural test via injection)
+
+```typescript
+// FeedbackForm.test.tsx
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { FeedbackForm } from './FeedbackForm'
-import { FeedbackProvider } from './feedback-context' // see below
-
+import { FeedbackProvider } from './feedback-context'
 
 test('calls onFeedbackSent on successful submit', async () => {
   const onFeedbackSent = jest.fn()
   const onFeedbackError = jest.fn()
   const sendFeedback = jest.fn().mockResolvedValue({ estimatedResponseTime: '24h' })
-
 
   const { container } = render(
     <FeedbackProvider value={{ sendFeedback }}>
@@ -147,404 +165,160 @@ test('calls onFeedbackSent on successful submit', async () => {
     </FeedbackProvider>
   )
 
-
   const form = container.querySelector('form') as HTMLFormElement
   fireEvent.submit(form)
 
-
   await waitFor(() => {
-  expect(onFeedbackSent).toHaveBeenCalledWith({ estimatedResponseTime: '24h' })
+    expect(onFeedbackSent).toHaveBeenCalledWith({ estimatedResponseTime: '24h' })
   })
   expect(onFeedbackError).not.toHaveBeenCalled()
 })
-
-// ... other tests
-
 ```
 
-### BAD — Direct Implementation Dependency (DIP violation)
-
-> Components directly depend on concrete API implementations.
+### BAD — Hook directly depends on axios and API details
 
 ```typescript
 import axios from 'axios'
 
-// VIOLATION: Hook directly depends on axios and API details
 function useUser(userId: string) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // VIOLATION: Direct axios dependency
-    axios.get(`https://api.example.com/users/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    .then(response => {
-      // VIOLATION: Knows about API response structure
-      setUser({
-        id: response.data.id,
-        name: response.data.full_name,  // API-specific field name
-        email: response.data.email_address,
-        createdAt: new Date(response.data.created_timestamp)
+    axios
+      .get(`https://api.example.com/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       })
-    })
-    .catch(err => {
-      // VIOLATION: Axios-specific error handling
-      if (err.response?.status === 404) {
-        setError(new Error('User not found'))
-      } else {
-        setError(err)
-      }
-    })
-    .finally(() => setLoading(false))
+      .then((response) => {
+        setUser({
+          id: response.data.id,
+          name: response.data.full_name,
+          email: response.data.email_address,
+          createdAt: new Date(response.data.created_timestamp),
+        })
+      })
+      .catch((err) => {
+        if (err.response?.status === 404) {
+          setError(new Error('User not found'))
+        } else {
+          setError(err)
+        }
+      })
+      .finally(() => setLoading(false))
   }, [userId])
 
   return { user, loading, error }
 }
-
-// VIOLATION: Component knows about localStorage implementation
-function LoginForm() {
-  const [credentials, setCredentials] = useState({ email: '', password: '' })
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      // VIOLATION: Direct API call in component
-      const response = await axios.post('https://api.example.com/auth/login', {
-        email: credentials.email,
-        password: credentials.password
-      })
-      
-      // VIOLATION: Direct localStorage manipulation
-      localStorage.setItem('token', response.data.access_token)
-      localStorage.setItem('userId', response.data.user_id)
-      
-      // VIOLATION: Direct window navigation
-      window.location.href = '/dashboard'
-    } catch (err) {
-      console.error('Login failed:', err)
-    }
-  }
-  
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* form fields */}
-    </form>
-  )
-}
-
-// VIOLATION: Direct WebSocket dependency
-function ChatRoom({ roomId }: { roomId: string }) {
-  const [messages, setMessages] = useState<Message[]>([])
-  
-  useEffect(() => {
-    // VIOLATION: Component knows WebSocket details
-    const ws = new WebSocket(`wss://chat.example.com/rooms/${roomId}`)
-    
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data)
-      setMessages(prev => [...prev, message])
-    }
-    
-    return () => ws.close()
-  }, [roomId])
-  
-  const sendMessage = (text: string) => {
-    // VIOLATION: Direct WebSocket usage
-    ws.send(JSON.stringify({ type: 'message', text }))
-  }
-  
-  return <div>{/* chat UI */}</div>
-}
 ```
 
-### GOOD — Abstraction-Based (DIP compliant)
+### GOOD — Hook depends on interfaces
 
-> Components depend on interfaces; implementations are injected.
+> Hook depend on interfaces; implementations are injected.
 
 ```typescript
-// Define interfaces that components need
-interface UserService {
+interface UserApi {
   getUser(id: string): Promise<User>
   updateUser(id: string, data: Partial<User>): Promise<User>
   deleteUser(id: string): Promise<void>
 }
 
-interface AuthService {
-  login(email: string, password: string): Promise<AuthToken>
-  logout(): Promise<void>
-  getCurrentUser(): Promise<User | null>
-  getToken(): string | null
-}
-
-interface MessageService {
-  connect(roomId: string): void
-  disconnect(): void
-  sendMessage(text: string): void
-  onMessage(handler: (message: Message) => void): () => void
-}
-
-// Hook depends on interface, not implementation
-function useUser(userId: string, userService: UserService) {
+// Preferred: pass the dependency in (great for tests)
+function useUser(userId: string, userApi: UserApi) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    userService.getUser(userId)
-      .then(setUser)
-      .catch(setError)
-      .finally(() => setLoading(false))
-  }, [userId, userService])
+    let cancelled = false
+    setLoading(true)
+    setError(null)
 
-  const updateUser = useCallback(async (data: Partial<User>) => {
-    const updated = await userService.updateUser(userId, data)
-    setUser(updated)
-    return updated
-  }, [userId, userService])
+    userApi
+      .getUser(userId)
+      .then((u) => !cancelled && setUser(u))
+      .catch((e) => !cancelled && setError(e as Error))
+      .finally(() => !cancelled && setLoading(false))
+
+    return () => {
+      cancelled = true
+    }
+  }, [userId, userApi])
+
+  const updateUser = useCallback(
+    async (data: Partial<User>) => {
+      const updated = await userApi.updateUser(userId, data)
+      setUser(updated)
+      return updated
+    },
+    [userId, userApi]
+  )
 
   return { user, loading, error, updateUser }
 }
 
-// Component depends on abstraction
-function LoginForm({ 
-  authService,
-  onSuccess 
-}: { 
-  authService: AuthService
-  onSuccess: () => void
-}) {
-  const [credentials, setCredentials] = useState({ email: '', password: '' })
-  const [error, setError] = useState<string | null>(null)
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    
-    try {
-      await authService.login(credentials.email, credentials.password)
-      onSuccess()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
-    }
-  }
-  
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        value={credentials.email}
-        onChange={e => setCredentials(prev => ({ ...prev, email: e.target.value }))}
-      />
-      <input
-        type="password"
-        value={credentials.password}
-        onChange={e => setCredentials(prev => ({ ...prev, password: e.target.value }))}
-      />
-      {error && <div className="error">{error}</div>}
-      <button type="submit">Login</button>
-    </form>
-  )
+// Optional adapter: pull the dependency from context, then delegate
+const UserApiContext = React.createContext<UserApi | null>(null)
+const useUserApi = (): UserApi => {
+  const api = React.useContext(UserApiContext)
+  if (!api) throw new Error('useUserApi must be used within a Provider')
+  return api
 }
 
-// HTTP implementation (can be swapped)
-class HttpUserService implements UserService {
-  constructor(
-    private apiClient: ApiClient,
-    private authService: AuthService
-  ) {}
+function useUserWithApi(userId: string) {
+  const api = useUserApi()
+  return useUser(userId, api)
+}
+```
 
-  async getUser(id: string): Promise<User> {
-    try {
-      const response = await this.apiClient.get(`/users/${id}`, {
-        headers: this.getAuthHeaders()
-      })
-      return this.mapApiUserToUser(response.data)
-    } catch (error) {
-      if (error.status === 404) {
-        throw new UserNotFoundError(id)
-      }
-      throw error
+#### The good pattern allows us to test the interaction between UI state and the API with dependency injection
+
+```typescript
+// useUser.test.tsx
+import { renderHook, act, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import type { UserApi, User } from './user-api-types'
+import { useUser } from './useUser'
+
+describe('useUser', () => {
+  test('loads user and exposes updateUser', async () => {
+    const mockUser: User = {
+      id: 'u1',
+      name: 'Amy',
+      email: 'amy@example.com',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
     }
-  }
 
-  async updateUser(id: string, data: Partial<User>): Promise<User> {
-    const response = await this.apiClient.patch(`/users/${id}`, 
-      this.mapUserToApiUser(data),
-      { headers: this.getAuthHeaders() }
-    )
-    return this.mapApiUserToUser(response.data)
-  }
+    const updatedUser: User = { ...mockUser, name: 'Amy Pond' }
 
-  async deleteUser(id: string): Promise<void> {
-    await this.apiClient.delete(`/users/${id}`, {
-      headers: this.getAuthHeaders()
+    const mockApi: jest.Mocked<UserApi> = {
+      getUser: jest.fn().mockResolvedValue(mockUser),
+      updateUser: jest.fn().mockResolvedValue(updatedUser),
+      deleteUser: jest.fn().mockResolvedValue(undefined),
+    }
+
+    const { result } = renderHook(() => useUser('u1', mockApi))
+
+    // initial state
+    expect(result.current.loading).toBe(true)
+    expect(result.current.user).toBeNull()
+    expect(result.current.error).toBeNull()
+
+    // resolves getUser
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(mockApi.getUser).toHaveBeenCalledWith('u1')
+    expect(result.current.user).toEqual(mockUser)
+
+    // update path
+    await act(async () => {
+      await result.current.updateUser({ name: 'Amy Pond' })
     })
-  }
-
-  private getAuthHeaders() {
-    const token = this.authService.getToken()
-    return token ? { Authorization: `Bearer ${token}` } : {}
-  }
-
-  private mapApiUserToUser(apiUser: any): User {
-    return {
-      id: apiUser.id,
-      name: apiUser.full_name,
-      email: apiUser.email_address,
-      createdAt: new Date(apiUser.created_timestamp)
-    }
-  }
-
-  private mapUserToApiUser(user: Partial<User>): any {
-    return {
-      full_name: user.name,
-      email_address: user.email
-    }
-  }
-}
-
-// Test implementation (for testing)
-class MockUserService implements UserService {
-  private users = new Map<string, User>()
-
-  async getUser(id: string): Promise<User> {
-    const user = this.users.get(id)
-    if (!user) throw new UserNotFoundError(id)
-    return user
-  }
-
-  async updateUser(id: string, data: Partial<User>): Promise<User> {
-    const user = await this.getUser(id)
-    const updated = { ...user, ...data }
-    this.users.set(id, updated)
-    return updated
-  }
-
-  async deleteUser(id: string): Promise<void> {
-    this.users.delete(id)
-  }
-
-  // Test helper
-  addUser(user: User): void {
-    this.users.set(user.id, user)
-  }
-}
-
-// WebSocket implementation
-class WebSocketMessageService implements MessageService {
-  private ws: WebSocket | null = null
-  private handlers: Set<(message: Message) => void> = new Set()
-
-  connect(roomId: string): void {
-    this.ws = new WebSocket(`wss://chat.example.com/rooms/${roomId}`)
-    
-    this.ws.onmessage = (event) => {
-      const message = JSON.parse(event.data)
-      this.handlers.forEach(handler => handler(message))
-    }
-  }
-
-  disconnect(): void {
-    this.ws?.close()
-    this.ws = null
-  }
-
-  sendMessage(text: string): void {
-    if (!this.ws) throw new Error('Not connected')
-    this.ws.send(JSON.stringify({ type: 'message', text }))
-  }
-
-  onMessage(handler: (message: Message) => void): () => void {
-    this.handlers.add(handler)
-    return () => this.handlers.delete(handler)
-  }
-}
-
-// Component uses injected service
-function ChatRoom({ 
-  roomId,
-  messageService 
-}: { 
-  roomId: string
-  messageService: MessageService
-}) {
-  const [messages, setMessages] = useState<Message[]>([])
-  
-  useEffect(() => {
-    messageService.connect(roomId)
-    
-    const unsubscribe = messageService.onMessage((message) => {
-      setMessages(prev => [...prev, message])
-    })
-    
-    return () => {
-      unsubscribe()
-      messageService.disconnect()
-    }
-  }, [roomId, messageService])
-  
-  const sendMessage = (text: string) => {
-    messageService.sendMessage(text)
-  }
-  
-  return (
-    <div className="chat-room">
-      <MessageList messages={messages} />
-      <MessageInput onSend={sendMessage} />
-    </div>
-  )
-}
-
-// Dependency injection via Context
-const ServiceContext = createContext<{
-  userService: UserService
-  authService: AuthService
-  messageService: MessageService
-} | null>(null)
-
-function ServiceProvider({ children }: { children: React.ReactNode }) {
-  const services = useMemo(() => {
-    const authService = new HttpAuthService()
-    const apiClient = new ApiClient('https://api.example.com')
-    
-    return {
-      authService,
-      userService: new HttpUserService(apiClient, authService),
-      messageService: new WebSocketMessageService()
-    }
-  }, [])
-  
-  return (
-    <ServiceContext.Provider value={services}>
-      {children}
-    </ServiceContext.Provider>
-  )
-}
-
-function useServices() {
-  const services = useContext(ServiceContext)
-  if (!services) {
-    throw new Error('useServices must be used within ServiceProvider')
-  }
-  return services
-}
-
-// Usage in component
-function UserProfile({ userId }: { userId: string }) {
-  const { userService } = useServices()
-  const { user, loading, error } = useUser(userId, userService)
-  
-  if (loading) return <Spinner />
-  if (error) return <ErrorMessage error={error} />
-  if (!user) return <EmptyState />
-  
-  return <UserCard user={user} />
-}
+    expect(mockApi.updateUser).toHaveBeenCalledWith('u1', { name: 'Amy Pond' })
+    expect(result.current.user).toEqual(updatedUser)
+  })
+})
 ```
 
 ## When to Apply DIP in React
@@ -557,6 +331,7 @@ function UserProfile({ userId }: { userId: string }) {
 * Third-party service integrations
 * Real-time connections (WebSocket, SSE)
 * Complex business logic
+* Separate concerns between UI presentation - UI behaviour - Business logic - Persistence
 
 ### Keep Concrete for
 
