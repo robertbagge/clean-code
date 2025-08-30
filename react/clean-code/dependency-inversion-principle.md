@@ -18,7 +18,7 @@ In React, DIP means:
 * Keep API/database details out of components
 * Use dependency injection for testability
 
-## Implementation Example
+## Implementation Examples
 
 ### Scaffolding for Examples
 
@@ -41,6 +41,125 @@ class UserNotFoundError extends Error {
     super(`User ${userId} not found`)
   }
 }
+
+```
+
+### BAD - Component handles complete/error actions on it's own
+
+```typescript
+function FeedbackForm() {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const { sendFeedback } = useFeedback();
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      await sendFeedback(title, description)
+      
+      // VIOLATION: UI component decides next UI state
+      window.location.href = '/dashboard'
+    } catch (err) {
+      // VIOLATION: UI component handles error
+      console.error('Send feedback failed:', err)
+    }
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+    </form>
+  )
+}
+```
+
+### GOOD - component accepts success/error hook
+
+```typescript
+type Props = {
+  onFeedbackSent: ({estimatedResponseTime: string}) => void
+  onFeedbackError: (Error) => void
+}
+
+function FeedbackForm({onFeedbackSent, onFeedbackError}: Props) {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const { sendFeedback } = useFeedback();
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      const { estimatedResponseTime } = await sendFeedback(title, description)
+      
+      onFeedbackSent({estimatedResponseTime})
+    } catch (err) {
+      onFeedbackError(error)
+    }
+  }
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+    </form>
+  )
+}
+
+function FeedbackSection() {
+  const { toast } = useToast()
+
+  const onFeedbackSent = ({estimatedResponseTime: string}) => {
+    toast.success(`Feedback sent - we will respond in ${estimatedResponseTime}`)
+  }
+  const onFeedbackError = (error) => {
+    toast.error('Could not send feedback')
+    // Throw error again to let higher error boundary (like sentry) handle
+    throw error
+  }
+
+  return <>
+    <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError}>
+  <>
+}
+
+```
+
+#### The good pattern allows us for behavioural testing with injection
+
+```typescript
+import React from 'react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { FeedbackForm } from './FeedbackForm'
+import { FeedbackProvider } from './feedback-context' // see below
+
+
+test('calls onFeedbackSent on successful submit', async () => {
+  const onFeedbackSent = jest.fn()
+  const onFeedbackError = jest.fn()
+  const sendFeedback = jest.fn().mockResolvedValue({ estimatedResponseTime: '24h' })
+
+
+  const { container } = render(
+    <FeedbackProvider value={{ sendFeedback }}>
+      <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError} />
+    </FeedbackProvider>
+  )
+
+
+  const form = container.querySelector('form') as HTMLFormElement
+  fireEvent.submit(form)
+
+
+  await waitFor(() => {
+  expect(onFeedbackSent).toHaveBeenCalledWith({ estimatedResponseTime: '24h' })
+  })
+  expect(onFeedbackError).not.toHaveBeenCalled()
+})
+
+// ... other tests
+
 ```
 
 ### BAD — Direct Implementation Dependency (DIP violation)
