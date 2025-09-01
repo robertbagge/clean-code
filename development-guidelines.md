@@ -30,3 +30,4 @@ task list
 - Create a top-level folder named after the language (e.g., `python/`, `rust/`).
 - Include a brief `README.md` inside the new folder explaining what examples
   exist and how to apply them elsewhere.
+- For existing language I am happy for contributions
