@@ -11,7 +11,18 @@ component management.
 
 ### Discriminated Unions vs Optional Fields
 
-* **Discriminated unions** for variants with different shapes:
+#### BAD - Fat type with optional fields
+
+  ```typescript
+  // BAD - Unclear which fields are valid when
+  type AsyncState<T> = {
+    status: 'loading' | 'error' | 'success'
+    data?: T
+    error?: Error
+  }
+  ```
+
+#### Good discriminated union with strongly defined types
 
   ```typescript
   // GOOD - Type-safe, no optional fields
@@ -33,580 +44,361 @@ component management.
   }
   ```
 
-* **Avoid optional fields** when types are mutually exclusive:
+## Loading and Error states
 
-  ```typescript
-  // BAD - Unclear which fields are valid when
-  type AsyncState<T> = {
-    status: 'loading' | 'error' | 'success'
-    data?: T
-    error?: Error
-  }
-  ```
+### Use ErrorBoundaries and Suspense to handle loading states
 
-### Where to Define Interfaces
+```typescript
+function UserInfoError() {
+  // error boundary implementation
+}
 
-* **Define interfaces near consumers** (components/hooks that use them).
-  This keeps them minimal and tailored to actual needs.
+function UserInfoLoading() {
+  // loading state iplementation
+}
 
-  ```typescript
-  // UserList.tsx - Consumer defines what it needs
-  interface UserService {
-    getUsers(): Promise<User[]>
-    deleteUser(id: string): Promise<void>
-  }
+interface Props {
+  userID: string
+}
+
+function UserInfoDisplay({user}: {user: User}) {
+  // display
+}
+
+function UserInfo({ userId }: Props) {
+  const user = useUser(userId) // data loading with suspense/error boundary support
+
+  return (<UserInfoDisplay user={user} />)
+}
+
+function UserInfoSection({ userID }: Props) {
+
+  return (
+    <ErrorBoundary fallback={<UserInfoError />}>
+      <Suspense fallback={UserInfoLoading />}>
+        <UserInfo userID={userID} />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+```
+
+## Component Composition to allow for reuse and efficient renders
+
+- Use composition over inheritance
+- Leverage children and render props:
+
+```typescript
+function Layout({ header, sidebar, children }: LayoutProps) {
+  return (
+    <div className="layout">
+      <header>{header}</header>
+      <aside>{sidebar}</aside>
+      <main>{children}</main>
+    </div>
+  )
+}
+```
+
+## Component structure
+
+### 1. Display Components at the core
+
+- Pure functions that render UI based on props
+- Only cares about displaying information and other components
+- No business logic or side effects
+- Example:
+
+```typescript
+interface UserCardProps {
+  user: User
+  onEdit: (user: User) => void
+  onDelete: (id: string) => void
+}
+
+function UserCardDisplay({ user, onEdit, onDelete }: UserCardProps) {
+  return (
+    <div className="user-card">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+      <button onClick={() => onEdit(user)}>Edit</button>
+      <button onClick={() => onDelete(user.id)}>Delete</button>
+    </div>
+  )
+}
+```
+
+### 2. Container Components that sets up async state and callbacks
+
+- Handle data fetching and render logic via hooks
+- Pass data and callbacks to display components
+- Does not care about display at all
+- Example:
+
+```typescript
+function UserCard({userID}: Props) {
+  const {user, updateUser, deleteUser} = useUser(userId)
+
+  return (<UserCardDisplay
+    user={user}
+    onEdit={updateUser}
+    onDelete={deleteUser}
+  />)
+}
+```
+
+### 3. (Optional) loading/error boundary close to the component
+
+- Handle error and loading states close to the page/screen section
+
+```typescript
+function UserSection({userID}: Props) {
+  return (<ErrorBoundary fallback={<UserCardError />}>)
+    <Suspense fallback={<UserCardLoading />}>
+      <UserCard userId={userId} />
+    </Suspense>
+  </ErrorBoundary>)
+}
+```
+
+### 4. Custom Hooks that encapsulates async data loading more complex ui state
+
+- Encapsulate all data loading logic and side effects
+- Return data and functions for components to use
+- Accept dependencies for testability
+- Wrap in hook that loads dependencies from provider
+
+```typescript
+const useUsersWithApi = (userApi: UserApi) => {
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   
-  interface UserListProps {
-    userService: UserService
-  }
-  ```
-
-* **Services/adapters** should export concrete implementations only.
-  They satisfy consumer-defined interfaces implicitly.
-* **Exception:** Truly generic interfaces (e.g. `Observable`) can live in shared types.
-
-### Interface Guidelines
-
-* Keep interfaces **focused** on single capabilities
-* Use **intersection types** to compose larger contracts:
-
-  ```typescript
-  type UserReader = {
-    getUser(id: string): Promise<User>
-  }
+  useEffect(() => {
+    userApi.getUsers()
+      .then(setUsers)
+      .catch(setError)
+      .finally(() => setLoading(false))
+  }, [userApi])
   
-  type UserWriter = {
-    saveUser(user: User): Promise<void>
-  }
-  
-  type UserRepository = UserReader & UserWriter
-  ```
+  return { users, loading, error }
+}
 
----
+const useUsers = () => {
+  const usersApi = useUsersApi()
 
-## Error Handling
+  return useUsersWithApi(usersApi)
+}
+```
 
-### Error Boundaries
-
-* Use error boundaries to catch React rendering errors:
-
-  ```typescript
-  class ErrorBoundary extends Component<Props, State> {
-    static getDerivedStateFromError(error: Error): State {
-      return { hasError: true, error }
-    }
-    
-    componentDidCatch(error: Error, info: ErrorInfo) {
-      logErrorToService(error, info)
-    }
-    
-    render() {
-      if (this.state.hasError) {
-        return <ErrorFallback error={this.state.error} />
-      }
-      return this.props.children
-    }
-  }
-  ```
-
-### Domain Errors
-
-* Create typed domain errors for business logic:
-
-  ```typescript
-  class UserNotFoundError extends Error {
-    constructor(public readonly userId: string) {
-      super(`User ${userId} not found`)
-      this.name = 'UserNotFoundError'
-    }
-  }
-  
-  class ValidationError extends Error {
-    constructor(public readonly fields: Record<string, string>) {
-      super('Validation failed')
-      this.name = 'ValidationError'
-    }
-  }
-  ```
-
-### Map API Errors → Domain Errors
-
-* Don't leak HTTP/GraphQL details to components:
-
-  ```typescript
-  async function fetchUser(id: string): Promise<User> {
-    const response = await fetch(`/api/users/${id}`)
-    
-    if (response.status === 404) {
-      throw new UserNotFoundError(id)
-    }
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user: ${response.statusText}`)
-    }
-    
-    return response.json()
-  }
-  ```
-
----
-
-## Testing Practices
+## Testing Strategy
 
 ### Component Testing
 
-* Test behavior via user interactions, not implementation:
+#### 1. Focus on testing behaviour, not display details
 
-  ```typescript
-  // UserProfile.test.tsx
-  import { render, screen, waitFor } from '@testing-library/react'
-  import userEvent from '@testing-library/user-event'
+- Test initial loading/error/render if component is loading data
+- Test success/error/loading of user actions
+
+```typescript
+// UserCreationForm.test.tsx
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+test('submit form fails with validation errors when form is incomplete', async () => {
+  const userApi = {
+    createUser: jest.fn()
+  }
   
-  test('displays user after loading', async () => {
-    const mockService = {
-      getUser: jest.fn().mockResolvedValue({
-        id: '1',
-        name: 'Alice',
-        email: 'alice@example.com'
-      })
-    }
-    
-    render(<UserProfile userId="1" userService={mockService} />)
-    
-    expect(screen.getByText(/loading/i)).toBeInTheDocument()
-    
-    await waitFor(() => {
-      expect(screen.getByText('Alice')).toBeInTheDocument()
-    })
-    
-    expect(mockService.getUser).toHaveBeenCalledWith('1')
-  })
-  ```
+  const onUserCreated = jest.fn()
+  const onCreateUserError = jest.fn()
+  
+  const { container } = render(
+    <APIProvider value={{userApi}}}>
+      <UserCreationForm onUserCreated={onUserCreated} onCreateUserError={onCreateUserError} />
+    </FeedbackProvider>
+  )
+  
+  const formButton = container.querySelector('FormButton') as HTMLFormElement
+  formButton.click()
+  
+  expect(onUserCreated).not.toHaveBeenCalled()
+  expect(onCreateUserError).not.toHaveBeenCalled()
+  // assert validation errors
+})
+
+test('submit form fails to error boundary when createUser return error', async () => {
+  // test implementation asserting on UI error state and onCreateUserError called
+})
+
+test('submit form succeeds when form is valid and createUser returns success, async () => {
+  // test implementation asserting on UI success state and onUserCreated called
+})
+```
+
+#### 2. Test render behaviour
+
+- Test initial renders
+  - First render
+  - Render after data has loaded
+- Test to check for unexpected re-renders. Component should not re-render if props stays the same.
+
+#### 3. For critical UI components different display states can be regression tested with snapshots
 
 ### Hook Testing
 
-* Test hooks in isolation with renderHook:
+#### 1. Test hooks in isolation with renderHook
 
-  ```typescript
-  import { renderHook, act } from '@testing-library/react'
+```typescript
+import { renderHook, act } from '@testing-library/react'
+
+test('useCounter increments value', () => {
+  const { result } = renderHook(() => useCounter())
   
-  test('useCounter increments value', () => {
-    const { result } = renderHook(() => useCounter())
-    
-    expect(result.current.count).toBe(0)
-    
-    act(() => {
-      result.current.increment()
-    })
-    
-    expect(result.current.count).toBe(1)
+  expect(result.current.count).toBe(0)
+  
+  act(() => {
+    result.current.increment()
   })
-  ```
-
-### Dependency Injection for Testing
-
-* **NO jest.mock()** - Use dependency injection instead:
-
-  ```typescript
-  // BAD - Using jest.mock
-  jest.mock('../services/api')
   
-  // GOOD - Dependency injection
-  function useUsers(userService: UserService) {
-    const [users, setUsers] = useState<User[]>([])
-    
-    useEffect(() => {
-      userService.getUsers().then(setUsers)
-    }, [userService])
-    
-    return users
-  }
-  
-  // In tests, pass a stub
-  const stubService: UserService = {
-    getUsers: jest.fn().mockResolvedValue(mockUsers)
-  }
-  ```
-
-### Stub Implementations
-
-* Create simple stubs for testing:
-
-  ```typescript
-  class StubUserService implements UserService {
-    private users = new Map<string, User>()
-    
-    async getUser(id: string): Promise<User> {
-      const user = this.users.get(id)
-      if (!user) throw new UserNotFoundError(id)
-      return user
-    }
-    
-    async saveUser(user: User): Promise<void> {
-      this.users.set(user.id, user)
-    }
-    
-    // Test helper
-    addUser(user: User): void {
-      this.users.set(user.id, user)
-    }
-  }
-  ```
-
-### Testing Re-renders
-
-* Verify components don't re-render unnecessarily:
-
-  ```typescript
-  test('memoizes expensive computation', () => {
-    const renderSpy = jest.fn()
-    
-    function ExpensiveComponent({ value }: { value: number }) {
-      renderSpy()
-      const result = useMemo(() => expensiveCalculation(value), [value])
-      return <div>{result}</div>
-    }
-    
-    const { rerender } = render(<ExpensiveComponent value={1} />)
-    expect(renderSpy).toHaveBeenCalledTimes(1)
-    
-    // Same prop - should not re-render
-    rerender(<ExpensiveComponent value={1} />)
-    expect(renderSpy).toHaveBeenCalledTimes(1)
-    
-    // Different prop - should re-render
-    rerender(<ExpensiveComponent value={2} />)
-    expect(renderSpy).toHaveBeenCalledTimes(2)
-  })
-  ```
-
----
-
-## Component Structure
-
-A clean component structure helps enforce separation of concerns and maintainability.
-
-### Suggested Organization
-
-```txt
-/components
-  /common           # Shared UI components
-    Button.tsx
-    Input.tsx
-    Modal.tsx
-  /features
-    /users          # Feature-specific components
-      UserList.tsx
-      UserProfile.tsx
-      UserForm.tsx
-/hooks              # Custom hooks
-  useAuth.ts
-  useApi.ts
-  useDebounce.ts
-/services           # Business logic & API calls
-  userService.ts
-  authService.ts
-/types              # Shared TypeScript types
-  user.ts
-  api.ts
+  expect(result.current.count).toBe(1)
+})
 ```
 
-### Guidelines
+#### 2. Dependency Injection for Testing
 
-1. **Presentation Components**
+> **NO jest.mock()** - Use dependency injection instead
 
-   * Pure functions that render UI based on props
-   * No business logic or side effects
-   * Example:
+```typescript
+// BAD - Using jest.mock
+jest.mock('../apiClients/userApi')
 
-     ```typescript
-     interface UserCardProps {
-       user: User
-       onEdit: (user: User) => void
-       onDelete: (id: string) => void
-     }
-     
-     function UserCard({ user, onEdit, onDelete }: UserCardProps) {
-       return (
-         <div className="user-card">
-           <h3>{user.name}</h3>
-           <p>{user.email}</p>
-           <button onClick={() => onEdit(user)}>Edit</button>
-           <button onClick={() => onDelete(user.id)}>Delete</button>
-         </div>
-       )
-     }
-     ```
+// GOOD - Dependency injection
+function useUsers(userApi: UserApi) {
+  const [users, setUsers] = useState<User[]>([])
+  
+  useEffect(() => {
+    userApi.getUsers().then(setUsers)
+  }, [userApi])
+  
+  return users
+}
 
-2. **Container Components**
-
-   * Handle data fetching and business logic via hooks
-   * Pass data and callbacks to presentation components
-   * Example:
-
-     ```typescript
-     function UserListContainer({ userService }: { userService: UserService }) {
-       const users = useUsers(userService)
-       const { deleteUser } = useUserActions(userService)
-       
-       return <UserList users={users} onDelete={deleteUser} />
-     }
-     ```
-
-3. **Custom Hooks**
-
-   * Encapsulate all business logic and side effects
-   * Return data and functions for components to use
-   * Accept dependencies for testability:
-
-     ```typescript
-     function useUsers(service: UserService) {
-       const [users, setUsers] = useState<User[]>([])
-       const [loading, setLoading] = useState(true)
-       const [error, setError] = useState<Error | null>(null)
-       
-       useEffect(() => {
-         service.getUsers()
-           .then(setUsers)
-           .catch(setError)
-           .finally(() => setLoading(false))
-       }, [service])
-       
-       return { users, loading, error }
-     }
-     ```
-
-4. **Component Composition**
-
-   * Use composition over inheritance
-   * Leverage children and render props:
-
-     ```typescript
-     function Layout({ header, sidebar, children }: LayoutProps) {
-       return (
-         <div className="layout">
-           <header>{header}</header>
-           <aside>{sidebar}</aside>
-           <main>{children}</main>
-         </div>
-       )
-     }
-     ```
-
----
+// In tests, pass a stub
+const userApi: UserApi = {
+  getUsers: jest.fn().mockResolvedValue(mockUsers)
+}
+```
 
 ## Dependency Injection
 
 ### Context for Cross-cutting Concerns
 
-* Use React Context for app-wide dependencies:
+- Use React Context for app-wide dependencies:
 
-  ```typescript
-  const ServiceContext = createContext<Services | null>(null)
-  
-  function ServiceProvider({ children, services }: ServiceProviderProps) {
-    return (
-      <ServiceContext.Provider value={services}>
-        {children}
-      </ServiceContext.Provider>
-    )
+```typescript
+const ApiContext = createContext<ApiClients | null>(null)
+
+function ApiProvider({ children, apiClients }: ApiProviderProps) {
+  return (
+    <ApiContext.Provider value={apiClients}>
+      {children}
+    </ApiContext.Provider>
+  )
+}
+
+function useMessageApi(): ApiClients {
+  const apiClients = useContext(ApiContext)
+  if (!apiClients?.messageApi) {
+    throw new Error('useMessageClient must be used within ApiProvider')
   }
-  
-  function useServices(): Services {
-    const services = useContext(ServiceContext)
-    if (!services) {
-      throw new Error('useServices must be used within ServiceProvider')
-    }
-    return services
-  }
-  ```
-
-### Props for Component-specific Dependencies
-
-* Pass dependencies directly when scope is limited:
-
-  ```typescript
-  interface UserFormProps {
-    userService: UserService
-    validator: UserValidator
-    onSuccess: (user: User) => void
-  }
-  
-  function UserForm({ userService, validator, onSuccess }: UserFormProps) {
-    const handleSubmit = async (data: UserData) => {
-      const errors = validator.validate(data)
-      if (errors) return
-      
-      const user = await userService.createUser(data)
-      onSuccess(user)
-    }
-    
-    // ...
-  }
-  ```
-
-### Factory Functions for Complex Dependencies
-
-* Create factories for configurable dependencies:
-
-  ```typescript
-  function createApiService(config: ApiConfig): ApiService {
-    return {
-      async get<T>(path: string): Promise<T> {
-        const response = await fetch(`${config.baseUrl}${path}`, {
-          headers: config.headers
-        })
-        return response.json()
-      },
-      // ...
-    }
-  }
-  ```
-
----
+  return apiClients.messageApi
+}
+```
 
 ## Performance Optimization
 
 ### Memoization
 
-* Use `useMemo` for expensive computations:
+Use `useMemo` for expensive computations:
 
-  ```typescript
-  function DataTable({ data, filters }: DataTableProps) {
-    const filteredData = useMemo(
-      () => applyFilters(data, filters),
-      [data, filters]
-    )
-    
-    return <Table data={filteredData} />
-  }
-  ```
-
-* Use `React.memo` for pure components:
-
-  ```typescript
-  const UserCard = React.memo(function UserCard({ user }: UserCardProps) {
-    return <div>{user.name}</div>
-  })
-  ```
-
-### Code Splitting
-
-* Split large features into separate bundles:
-
-  ```typescript
-  const UserManagement = lazy(() => import('./features/users/UserManagement'))
+```typescript
+function DataTable({ data, filters }: DataTableProps) {
+  const filteredData = useMemo(
+    () => applyFilters(data, filters),
+    [data, filters]
+  )
   
-  function App() {
-    return (
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path="/users/*" element={<UserManagement />} />
-        </Routes>
-      </Suspense>
-    )
-  }
-  ```
-
-### Virtual Lists
-
-* Use virtualization for long lists:
-
-  ```typescript
-  import { FixedSizeList } from 'react-window'
-  
-  function UserList({ users }: { users: User[] }) {
-    const Row = ({ index, style }: RowProps) => (
-      <div style={style}>
-        <UserCard user={users[index]} />
-      </div>
-    )
-    
-    return (
-      <FixedSizeList
-        height={600}
-        itemCount={users.length}
-        itemSize={100}
-        width="100%"
-      >
-        {Row}
-      </FixedSizeList>
-    )
-  }
-  ```
-
----
+  return <Table data={filteredData} />
+}
+```
 
 ## State Management
 
 ### Local State
 
-* Keep state as close to where it's used as possible:
+Keep state as close to where it's used as possible:
 
-  ```typescript
-  function SearchBar() {
-    const [query, setQuery] = useState('')
-    
-    return (
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search..."
-      />
-    )
-  }
-  ```
+```typescript
+function SearchBar() {
+  const [query, setQuery] = useState('')
+  
+  return (
+    <input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Search..."
+    />
+  )
+}
+```
 
 ### Lifting State
 
-* Lift state only when multiple components need it:
+Lift state only when multiple components need it:
 
-  ```typescript
-  function Parent() {
-    const [selectedUser, setSelectedUser] = useState<User | null>(null)
-    
-    return (
-      <>
-        <UserList onSelect={setSelectedUser} />
-        <UserDetails user={selectedUser} />
-      </>
-    )
-  }
-  ```
+```typescript
+function Parent() {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  
+  return (
+    <>
+      <UserList onSelect={setSelectedUser} />
+      <UserDetails user={selectedUser} />
+    </>
+  )
+}
+```
 
 ### Global State
 
-* Use Context or state management libraries sparingly:
+- Use Context for truly glboal state. Shared UI state belongs in a container component/hook:
 
-  ```typescript
-  // Only for truly global state
-  const AuthContext = createContext<AuthState | null>(null)
-  
-  function useAuth() {
-    const auth = useContext(AuthContext)
-    if (!auth) throw new Error('Auth not provided')
-    return auth
-  }
-  ```
+```typescript
+// Only for truly global state
+const AuthContext = createContext<AuthState | null>(null)
 
----
+function useAuth() {
+  const auth = useContext(AuthContext)
+  if (!auth) throw new Error('Auth not provided')
+  return auth
+}
+```
 
 ## Key Takeaways
 
-* Use **discriminated unions** over types with optional fields
-* Define **interfaces in consumers**; services expose implementations
-* **No jest.mock()** - use dependency injection with stubs
-* Encapsulate **business logic in hooks** with injected dependencies
-* Keep **components focused** - separate presentation from logic
-* Test **behavior, not implementation**
-* **Memoize** expensive operations; virtualize long lists
-* Keep **state local** unless sharing is necessary
+- Use **discriminated unions** over types with optional fields
+- **No jest.mock()** - use dependency injection with stubs
+- Encapsulate **async data loading** and **complex render** logic in hooks with injected dependencies
+- Keep **components focused** - separate display from logic
+- Test **behavior, not implementation**
+- Keep **state local** unless sharing is necessary
 
 ---
 
 ## Further Reading
 
-* [React Documentation](https://react.dev)
-* [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
-* [Testing Library Best Practices](https://testing-library.com/docs/guiding-principles)
-* [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app)
+- [React Documentation](https://react.dev)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [Testing Library Best Practices](https://testing-library.com/docs/guiding-principles)
+- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app)
