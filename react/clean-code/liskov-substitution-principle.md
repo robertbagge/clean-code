@@ -90,6 +90,9 @@ function MyForm() {
 
 ### GOOD — Consistent Component Contracts (LSP compliant)
 
+* Note: forms are used here only to illustrate the pattern;
+most projects will use a form library.
+
 > Component variants maintain consistent behavior contracts.
 
 ```typescript

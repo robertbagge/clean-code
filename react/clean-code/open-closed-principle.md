@@ -221,6 +221,8 @@ const renderersOverride = (logger: Logger):
 5. **Variant-specific props on the base component** (base shouldn’t know “criticalOnly”)
 6. **Blind prop spreading** that masks incompatible contracts between variants
 7. **No graceful fallback** for unknown types (should degrade to a default renderer)
+8. Variant behavior must not change base prop semantics (LSP).
+Keep callback signatures and controlled props consistent across variants
 
 ## React-Specific OCP Techniques
 

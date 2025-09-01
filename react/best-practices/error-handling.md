@@ -34,7 +34,8 @@ class Conflict extends Error {
 
 ## Boundaries
 
-* Use Error Boundaries around page/section roots.
+* Use Error Boundaries around page/section roots to keep leaves pure.
+Use inline loading/error sparingly and only for tiny leaf widgets.
 * Let non-recoverable render errors bubble to a boundary.
 * For async flows, either:
 

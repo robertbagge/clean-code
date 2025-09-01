@@ -13,7 +13,7 @@ This makes components more testable, portable, and maintainable.
 In React, DIP means:
 
 * Components depend on interfaces, not implementations
-* Inject services via props or context
+* Inject dependencies via props or context
 * Hooks declare the contracts they need
 * Keep API/database details out of components
 * Use dependency injection for testability
@@ -187,6 +187,8 @@ test('calls onFeedbackSent on successful submit', async () => {
 })
 ```
 
+This example aligns with the recommendations in [testing](../best-practices/testing.md)
+
 ### BAD — Hook directly depends on axios and API details
 
 ```typescript
@@ -237,8 +239,12 @@ interface UserApi {
   deleteUser(id: string): Promise<void>
 }
 
+interface Deps {
+  userApi: UserApi
+}
+
 // Preferred: pass the dependency in (great for tests)
-function useUser(userId: string, userApi: UserApi) {
+function useUserWithDeps({ userApi }: Deps, userId: string) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -279,9 +285,9 @@ const useUserApi = (): UserApi => {
   return api
 }
 
-function useUserWithApi(userId: string) {
-  const api = useUserApi()
-  return useUser(userId, api)
+function useUser(userId: string) {
+  const userApi = useUserApi()
+  return useUserWithDeps({ userApi }, userId)
 }
 ```
 
@@ -295,7 +301,7 @@ API with dependency injection
 import { renderHook, act, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import type { UserApi, User } from './user-api-types'
-import { useUser } from './useUser'
+import { useUserWithDeps } from './useUser'
 
 describe('useUser', () => {
   test('loads user and exposes updateUser', async () => {
@@ -314,7 +320,7 @@ describe('useUser', () => {
       deleteUser: jest.fn().mockResolvedValue(undefined),
     }
 
-    const { result } = renderHook(() => useUser('u1', mockApi))
+    const { result } = renderHook(() => useUser({userApi: mockApi}, 'WithApiu1'))
 
     // initial state
     expect(result.current.loading).toBe(true)
@@ -335,6 +341,8 @@ describe('useUser', () => {
   })
 })
 ```
+
+This example aligns with the recommendations in [testing](../best-practices/testing.md)
 
 ## When to Apply DIP in React
 

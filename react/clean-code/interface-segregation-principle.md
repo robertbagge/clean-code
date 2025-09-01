@@ -126,6 +126,8 @@ function ProfileHeader({ userName, userAvatar, onLogout }: HeaderProps) {
 * Create **custom hooks** for data selection
 * Keep prop interfaces **lean and specific**
 * Lean, stable props pair well with React.memo for fewer re-renders
+* Lean props often reduce re-renders and make memoization effective.
+See [performance.md](../best-practices/performance.md)
 
 ## Related Best Practices
 

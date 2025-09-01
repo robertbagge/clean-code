@@ -92,7 +92,11 @@ test('useCounter increments value', () => {
 jest.mock('../apiClients/userApi')
 
 // GOOD - Dependency injection
-function useUsers(userApi: UserApi) {
+
+interface Deps {
+  userApi: UserApi
+}
+function useUsersWithDeps({ userApi }: Deps) {
   const [users, setUsers] = useState<User[]>([])
   
   useEffect(() => {
@@ -107,3 +111,6 @@ const userApi: UserApi = {
   getUsers: jest.fn().mockResolvedValue(mockUsers)
 }
 ```
+
+See [DIP hook test](../clean-code/dependency-inversion-principle.md#testing-with-dependency-injection)
+for example.

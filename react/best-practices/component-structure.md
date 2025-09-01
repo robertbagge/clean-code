@@ -113,7 +113,11 @@ type UseUserResult = {
   deleteUser: () => Promise<void>
 }
 
-function useUserWithApi(userApi: UserApi, userId: string): UseUserResult {
+interface Deps {
+  userApi: UserApi
+}
+
+function useUserWithDeps({ userApi }: Deps, userId: string): UseUserResult {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -153,6 +157,10 @@ function useUserWithApi(userApi: UserApi, userId: string): UseUserResult {
 
 function useUser(userId: string): UseUserResult {
   const userApi = useUserApi()
-  return useUserWithApi(userApi, userId)
+  return useUserWithDeps({ userApi }, userId)
 }
 ```
+
+## Notes
+
+* When composing displays/containers, verify headings hierarchy, labels, focus order, and roles. See [accessibility.md](./accessibility.md).

@@ -82,6 +82,9 @@ const OrderCard = ({ id, total }: { id: string; total: string }) =>
 
 ```
 
+Note: If your UI library provides primitives (e.g., Card, CardHeader),
+reuse them instead of home-grown variants.
+
 ## When to Apply DRY in React
 
 ### Apply DRY for
