@@ -1,70 +1,52 @@
-# Clean Code Docs — Start Here
+# Clean Code – React
 
-These docs help you make pragmatic React design choices.
-Start with the documents in [best-practices](./best-practices/best-practices.md),
-[dependency-inversion-principle](./clean-code/dependency-inversion-principle.md)
-and then continue with the other [clean-code](./clean-code/) docs.
+## What this is
 
-## Why lead with DIP?
+A practical, opinionated guide to clean React: SOLID-style principles adapted
+for React + a set of best practices you can drop into any React-based codebase
+(React, Next.js, React Native).
 
-- **Testability:** Inject dependencies into hooks/components for easy testing.
-- **Portability:** Swap implementations (REST/GraphQL/WebSocket) without touching component logic.
-- **Boundaries:** Components define interfaces; services implement them.
+## Scope & portability
 
-👉 **Start here:** [Dependency Inversion (DIP)](clean-code/dependency-inversion-principle.md)
+Framework-agnostic: applies to React DOM/Native/Next.js. No assumptions on
+data-fetch libraries, routing, forms, or styling system.
 
----
+## How to use this guide
 
-## Jump to the right guide
+### For AI agent research
 
-- **New component or refactor?**  
-  Read: [DIP](clean-code/dependency-inversion-principle.md) →
-  [SRP](clean-code/single-responsibility-principle.md)  
-  Also see: [best-practices.md › Component Structure](./best-practices.md#component-structure)
-  and [› Dependency Injection](./best-practices.md#dependency-injection)
+Unless otherwise instructred, read all documents to get a full picture of best
+practices & clean code before distilling for your task.
 
-- **Component directly fetches data or calls APIs?**  
-  Read: [DIP](clean-code/dependency-inversion-principle.md)
+### For implementation guidance
 
-- **Component has too many props / hard to test?**  
-  Read: [ISP](clean-code/interface-segregation-principle.md)
+Lead with the [Best Practices index](./best-practices/best-practices.md),
+then dip into the clean-code principles when necessary. Common starting points:
+[SRP](./clean-code/single-responsibility-principle.md) and
+[DIP](./clean-code/dependency-inversion-principle.md).
 
-- **Adding a feature means editing existing components?**  
-  Read: [OCP](clean-code/open-closed-principle.md)
+## Start here
 
-- **Child components break when swapped?**  
-  Read: [LSP](clean-code/liskov-substitution-principle.md)
+* Read the [Best Practices index](./best-practices/best-practices.md) for
+day-to-day conventions, then consult a principle when shaping an API or refactoring.
 
-- **Business logic duplicated across components?**  
-  Read: [DRY](clean-code/dry-principle.md)
+## Clean code principles
 
-- **Feels over-engineered?**  
-  Read: [KISS](clean-code/kiss-principle.md)
-
----
-
-## Fast recipes (anchors into docs)
-
-- **Where to define interfaces** → [best-practices.md › TypeScript Interfaces](./best-practices.md#typescript-interfaces)
-- **Error handling & boundaries** → [best-practices.md › Error Handling](./best-practices.md#error-handling)
-- **Dependency injection patterns** →
-  [best-practices.md › Dependency Injection](./best-practices.md#dependency-injection)
-- **Testing (stubs, mocks, render testing)** →
-  [best-practices.md › Testing Practices](./best-practices.md#testing-practices)
-- **Component organization** → [best-practices.md › Component Structure](./best-practices.md#component-structure)
-
----
-
-## TL;DRs
-
-- **DIP:** Components depend on interfaces; inject implementations via props/context.  
-- **SRP:** One responsibility per component/hook.  
-- **ISP:** Lean prop interfaces; components only receive what they use.  
-- **OCP:** Extend via composition and children, not modification.  
-- **LSP:** Child components honor parent contracts without breaking.  
-- **DRY:** Single source of truth for business rules/validation.  
-- **KISS:** Simplest component that works; avoid premature abstraction.
+* [Single Responsibility (SRP)](./clean-code/single-responsibility-principle.md)
+– One responsibility per component/hook. Split fetching/formatting/presentation.
+* [Interface Segregation (ISP)](./clean-code/interface-segregation-principle.md)
+– Lean props; composition over fat prop bags.
+* [Dependency Inversion (DIP)](./clean-code/dependency-inversion-principle.md)
+– Depend on interfaces; inject implementations via props/context.
+* [Open–Closed (OCP)](./clean-code/open-closed-principle.md)
+– Extend via composition/children; avoid modifying core components.
+* [Liskov Substitution (LSP)](./clean-code/liskov-substitution-principle.md)
+– Variants honor the same contract; consistent callbacks/semantics.
+* [Don’t Repeat Yourself (DRY)](./clean-code/dry.md)
+– Centralize repeating patterns (cards, date formatting, rules).
+* [Keep It Simple (KISS)](./clean-code/kiss.md)
+– Start simple; refactor when pressure appears.
 
 ## Check yourself before you ship
 
-Use the quick [design-checklist.md](./design-checklist.md) before shipping.
+* Use the quick [design checklist](./design-checklist.md) before shipping.
