@@ -253,4 +253,4 @@ Keep callback signatures and controlled props consistent across variants
 ## Related Best Practices
 
 For component composition and patterns, see
-👉 [best-practices.md](../best-practices/best-practices.md)
+👉 [best-practices.md](../best-practices/index.md)

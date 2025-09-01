@@ -20,14 +20,14 @@ practices & clean code before distilling for your task.
 
 ### For implementation guidance
 
-Lead with the [Best Practices index](./best-practices/best-practices.md),
+Lead with the [Best Practices index](./best-practices/index.md),
 then dip into the clean-code principles when necessary. Common starting points:
 [SRP](./clean-code/single-responsibility-principle.md) and
 [DIP](./clean-code/dependency-inversion-principle.md).
 
 ## Start here
 
-* Read the [Best Practices index](./best-practices/best-practices.md) for
+* Read the [Best Practices index](./best-practices/index.md) for
 day-to-day conventions, then consult a principle when shaping an API or refactoring.
 
 ## Clean code principles
@@ -42,9 +42,9 @@ day-to-day conventions, then consult a principle when shaping an API or refactor
 – Extend via composition/children; avoid modifying core components.
 * [Liskov Substitution (LSP)](./clean-code/liskov-substitution-principle.md)
 – Variants honor the same contract; consistent callbacks/semantics.
-* [Don’t Repeat Yourself (DRY)](./clean-code/dry.md)
+* [Don’t Repeat Yourself (DRY)](./clean-code/dry-principle.md)
 – Centralize repeating patterns (cards, date formatting, rules).
-* [Keep It Simple (KISS)](./clean-code/kiss.md)
+* [Keep It Simple (KISS)](./clean-code/kiss-principle.md)
 – Start simple; refactor when pressure appears.
 
 ## Check yourself before you ship

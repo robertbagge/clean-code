@@ -236,4 +236,4 @@ avoid sprinkling loading UI inside leaf components
 ## Related Best Practices
 
 For component structure, testing patterns, and state management, see
-👉 [best-practices.md](../best-practices/best-practices.md)
+👉 [best-practices.md](../best-practices/index.md)

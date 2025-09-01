@@ -247,4 +247,4 @@ the same; avoid blind prop spreading that masks incompatibilities
 ## Related Best Practices
 
 For component interfaces and testing patterns, see
-👉 [best-practices.md](../best-practices/best-practices.md)
+👉 [best-practices.md](../best-practices/index.md)

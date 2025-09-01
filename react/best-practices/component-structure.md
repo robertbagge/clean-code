@@ -163,4 +163,5 @@ function useUser(userId: string): UseUserResult {
 
 ## Notes
 
-* When composing displays/containers, verify headings hierarchy, labels, focus order, and roles. See [accessibility.md](./accessibility.md).
+* When composing displays/containers, verify headings hierarchy,
+labels, focus order, and roles. See [accessibility.md](./accessibility.md).

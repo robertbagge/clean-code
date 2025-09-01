@@ -127,4 +127,4 @@ reuse them instead of home-grown variants.
 ## Related Best Practices
 
 For reusable patterns and utilities, see
-👉 [best-practices.md](../best-practices/best-practices.md)
+👉 [best-practices.md](../best-practices/index.md)

@@ -389,4 +389,4 @@ This example aligns with the recommendations in [testing](../best-practices/test
 ## Related Best Practices
 
 For dependency injection patterns and testing, see
-👉 [best-practices.md](../best-practices/best-practices.md)
+👉 [best-practices.md](../best-practices/index.md)
