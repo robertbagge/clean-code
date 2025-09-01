@@ -10,9 +10,15 @@
 
 * Components are PascalCase nouns: `UserCard`, `AccountScreen`, `SettingsPanel`.
 * Files match component names: `UserCard.tsx`.
-* Display vs container naming:
-  * Display/UI-only: `UserCardDisplay`, `Avatar`.
-  * Container/behavioral: `UserCard`, `UserListContainer`.
+* Display vs container naming to make consuming code neat and clean
+  * Display/UI-only:
+    * `XDisplay` when there is a container/behavioural wrapper, e.g
+      * `UserCardDisplay`
+      * `AvatarDisplay`
+    * `X` when there is no container/behaviour, e.g.
+      * `UserCard`
+      * `Avatar`.
+  * Container/behavioral: `UserCard`, `UserList`.
 
 ## Hooks
 

@@ -320,7 +320,9 @@ describe('useUser', () => {
       deleteUser: jest.fn().mockResolvedValue(undefined),
     }
 
-    const { result } = renderHook(() => useUser({userApi: mockApi}, 'u1'))
+    const { result } = renderHook(
+      () => useUserWithDeps({userApi: mockApi}, 'u1')
+    )
 
     // initial state
     expect(result.current.loading).toBe(true)
