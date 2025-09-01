@@ -123,9 +123,12 @@ type Renderer = {
 // Small factory so behaviors depend on injected logger, not console.*
 function buildDefaultRenderers(logger: Logger): Record<string, Renderer> {
   return {
-    info:    { icon: InfoIcon,    className: 'notification-info',    onClick: (n) => logger.info(n.message, n) },
-    warning: { icon: WarningIcon, className: 'notification-warning', onClick: (n) => logger.warn(n.message, n) },
-    error:   { icon: ErrorIcon,   className: 'notification-error',   onClick: (n) => logger.error(n.message, n) },
+    info:    { icon: InfoIcon,    className: 'notification-info',
+      onClick: (n) => logger.info(n.message, n) },
+    warning: { icon: WarningIcon, className: 'notification-warning',
+      onClick: (n) => logger.warn(n.message, n) },
+    error:   { icon: ErrorIcon,   className: 'notification-error',
+      onClick: (n) => logger.error(n.message, n) },
     success: { icon: CheckIcon,   className: 'notification-success' },
   }
 }
@@ -165,11 +168,14 @@ function NotificationList({
 }
 
 // Extension without modifying components
-const renderersOverride = (logger: Logger): Partial<Record<string, Renderer>> => ({
+const renderersOverride = (logger: Logger):
+  Partial<Record<string, Renderer>> => ({
   critical: {
     icon: AlertIcon,
     className: 'notification-critical',
-    onClick: (n) => { alertService.send(n); logger.error(`CRITICAL: ${n.message}`, n) },
+    onClick: (n) => {
+      alertService.send(n); logger.error(`CRITICAL: ${n.message}`, n)
+    },
   },
   debug: {
     icon: BugIcon,
@@ -206,9 +212,12 @@ const renderersOverride = (logger: Logger): Partial<Record<string, Renderer>> =>
 ## Anti-patterns to Avoid
 
 1. **Giant switch statements** that must be edited for every new type
-2. **Boolean prop explosion** (`primary`, `warning`, `ghost`, `outline`, …) instead of a single `variant`
-3. **Inheritance chains**; prefer composition and small extension points
-4. **Hidden singletons** (logger/router/theme imported directly) making extension require source edits
+2. **Boolean prop explosion** (`primary`, `warning`, `ghost`, `outline`, …)
+   instead of a single `variant`
+3. **Inheritance chains**; prefer composition and small extension
+   points
+4. **Hidden singletons** (logger/router/theme imported directly) making
+   extension require source edits
 5. **Variant-specific props on the base component** (base shouldn’t know “criticalOnly”)
 6. **Blind prop spreading** that masks incompatible contracts between variants
 7. **No graceful fallback** for unknown types (should degrade to a default renderer)
@@ -216,13 +225,17 @@ const renderersOverride = (logger: Logger): Partial<Record<string, Renderer>> =>
 ## React-Specific OCP Techniques
 
 1. **Children/slots** for content extension (`header`, `footer`, `actions`)
-2. **Render props/callbacks** to inject behavior (`renderItem`, `renderEmpty`)
-3. **Component maps** (or a small registry) to plug in type→renderer without edits
-4. **Dependency injection** via props/context (e.g., `logger`, `theme`) instead of deep imports
+2. **Render props/callbacks** to inject behavior (`renderItem`,
+   `renderEmpty`)
+3. **Component maps** (or a small registry) to plug in type→renderer without
+   edits
+4. **Dependency injection** via props/context (e.g., `logger`, `theme`)
+   instead of deep imports
 5. **Discriminated unions** for variant configs (`{ kind: 'warning', … }`)
 6. **Lazy-load per variant** to keep bundles lean (e.g., icons/components)
 7. **Memoize extension points** (`useMemo` for maps) to avoid re-renders
-8. **Keep LSP intact**: all variants honor the same base prop names/semantics; no hidden side effects
+8. **Keep LSP intact**: all variants honor the same base prop
+   names/semantics; no hidden side effects
 
 ## Key Takeaways
 

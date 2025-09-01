@@ -153,7 +153,8 @@ function TypedInput<T>({
 }
 
 // Concrete implementations that honor the contract
-const TextInput: React.FC<Omit<TypedInputProps<string>, 'parse' | 'format'>> = (props) => (
+const TextInput: React.FC<Omit<TypedInputProps<string>, 'parse' | 'format'>> =
+  (props) => (
   <TypedInput
     {...props}
     parse={(s) => s}
@@ -161,7 +162,8 @@ const TextInput: React.FC<Omit<TypedInputProps<string>, 'parse' | 'format'>> = (
   />
 )
 
-const NumberInput: React.FC<Omit<TypedInputProps<number>, 'parse' | 'format'>> = (props) => (
+const NumberInput: React.FC<Omit<TypedInputProps<number>, 'parse' | 'format'>> =
+  (props) => (
   <TypedInput
     {...props}
     parse={(s) => {
@@ -173,7 +175,8 @@ const NumberInput: React.FC<Omit<TypedInputProps<number>, 'parse' | 'format'>> =
   />
 )
 
-const DateInput: React.FC<Omit<TypedInputProps<Date>, 'parse' | 'format'>> = (props) => (
+const DateInput: React.FC<Omit<TypedInputProps<Date>, 'parse' | 'format'>> =
+  (props) => (
   <TypedInput
     {...props}
     parse={(s) => {

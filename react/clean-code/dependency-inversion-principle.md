@@ -17,7 +17,8 @@ In React, DIP means:
 * Hooks declare the contracts they need
 * Keep API/database details out of components
 * Use dependency injection for testability
-* Allows separation of concerns which great for using business/persistence logic for different platforms - Web/React Native etc.
+* Allows separation of concerns which great for using business/persistence
+  logic for different platforms - Web/React Native etc.
 
 ## Implementation Examples
 
@@ -108,7 +109,8 @@ function FeedbackForm({ onFeedbackSent, onFeedbackError }: Props) {
 function FeedbackSection() {
   const { toast } = useToast()
 
-  const onFeedbackSent = ({ estimatedResponseTime }: { estimatedResponseTime: string }) => {
+  const onFeedbackSent = ({ estimatedResponseTime }:
+    { estimatedResponseTime: string }) => {
     toast.success(`Feedback sent - we will respond in ${estimatedResponseTime}`)
   }
   const onFeedbackError = (error: Error) => {
@@ -119,7 +121,10 @@ function FeedbackSection() {
 
   return (
     <>
-      <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError} />
+      <FeedbackForm
+        onFeedbackSent={onFeedbackSent}
+        onFeedbackError={onFeedbackError}
+      />
     </>
   )
 }
@@ -132,7 +137,9 @@ function FeedbackSection() {
 import React, { createContext } from 'react'
 
 type FeedbackResult = { estimatedResponseTime: string }
-type FeedbackAPI = { sendFeedback: (title: string, description: string) => Promise<FeedbackResult> }
+type FeedbackAPI = {
+  sendFeedback: (title: string, description: string) => Promise<FeedbackResult>
+}
 
 export const FeedbackContext = createContext<FeedbackAPI | null>(null)
 export const FeedbackProvider = FeedbackContext.Provider
@@ -163,7 +170,10 @@ test('calls onFeedbackSent on successful submit', async () => {
 
   const { container } = render(
     <FeedbackProvider value={feedbackApi}>
-      <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError} />
+      <FeedbackForm
+        onFeedbackSent={onFeedbackSent}
+        onFeedbackError={onFeedbackError}
+      />
     </FeedbackProvider>
   )
 
@@ -275,7 +285,10 @@ function useUserWithApi(userId: string) {
 }
 ```
 
-#### The good pattern allows us to test the interaction between UI state and the API with dependency injection
+#### Testing with dependency injection
+
+The good pattern allows us to test the interaction between UI state and the
+API with dependency injection
 
 ```typescript
 // useUser.test.tsx

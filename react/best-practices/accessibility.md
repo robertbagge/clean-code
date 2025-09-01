@@ -2,13 +2,15 @@
 
 ## Using UI libraries? Quick gotcha
 
-* UI kits (shadcn/Radix, Material UI, Tamagui, etc.) provide accessible primitives, but customizations can break them.
+* UI kits (shadcn/Radix, Material UI, Tamagui, etc.) provide accessible
+  primitives, but customizations can break them.
 * Common pitfalls:
 
   * Replacing primitives with generic elements or misusing `asChild`, losing roles/labels.
   * Removing or obscuring focus outlines when theming.
   * Icon-only controls without accessible names (`aria-label`, `accessibilityLabel`).
-  * Breaking `aria-labelledby`/`aria-describedby` links by altering structure or IDs.
+  * Breaking `aria-labelledby`/`aria-describedby` links by altering
+    structure or IDs.
   * Nesting interactive elements (button inside link, pressable inside pressable).
   * React Native/Tamagui require explicit semantics and focus handling.
 * Quick checklist:
@@ -21,8 +23,10 @@
 
 ## Overview
 
-* Goal: make UIs usable with screen readers, keyboards, and assistive tech across Web, Next.js, and React Native/Expo.
-* Principles: semantic first, keyboard-first, minimal ARIA, visible focus, sufficient contrast, motion sensitivity, robust announcements.
+* Goal: make UIs usable with screen readers, keyboards, and assistive tech
+  across Web, Next.js, and React Native/Expo.
+* Principles: semantic first, keyboard-first, minimal ARIA, visible focus,
+  sufficient contrast, motion sensitivity, robust announcements.
 
 ## Semantics First
 
@@ -192,7 +196,8 @@ return <AnimatedThing disabled={prefersReducedMotion} />
 ## Lists, Tables, and Regions
 
 * Use semantic lists for collections and headings for structure.
-* For page layout, include one `<main>` region and use headings in order (`h1` → `h2`).
+* For page layout, include one `<main>` region and use headings in order
+  (`h1` → `h2`).
 * Tables should use `<th scope="col|row">` and captions when data is tabular.
 
 ```tsx
@@ -263,5 +268,7 @@ import { Pressable, Text } from 'react-native'
 ## Cross-Platform Notes
 
 * Web has richer native semantics. Favor native elements first.
-* React Native relies on `accessibilityRole`, `accessibilityLabel`, and focus management via screen readers and platform APIs.
-* Keep abstractions thin so web and native can supply platform-appropriate accessibility without leaking DOM specifics into shared code.
+* React Native relies on `accessibilityRole`, `accessibilityLabel`, and
+  focus management via screen readers and platform APIs.
+* Keep abstractions thin so web and native can supply platform-appropriate
+  accessibility without leaking DOM specifics into shared code.

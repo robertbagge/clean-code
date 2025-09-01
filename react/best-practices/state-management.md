@@ -52,7 +52,9 @@ type ApiClients = {
 
 const ApiContext = createContext<ApiClients | null>(null)
 
-function ApiProvider({ children, apiClients }: { children: React.ReactNode; apiClients: ApiClients }) {
+function ApiProvider({ children, apiClients }: {
+  children: React.ReactNode; apiClients: ApiClients
+}) {
   return <ApiContext.Provider value={apiClients}>{children}</ApiContext.Provider>
 }
 

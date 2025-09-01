@@ -50,7 +50,8 @@ const UserRow = React.memo(function UserRow({ user }: { user: User }) {
 ## Effects Hygiene
 
 * Keep `useEffect` small and focused.
-* Include all dependencies; move unstable function creation outside or into `useCallback` when passing them down.
+* Include all dependencies; move unstable function creation outside or into
+  `useCallback` when passing them down.
 
 ```typescript
 const handleSelect = useCallback((id: string) => onSelect(id), [onSelect])

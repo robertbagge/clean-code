@@ -64,7 +64,9 @@ type CardProps = {
 
 function Card({ header, children, footer, className }: CardProps) {
   return (
-    <section className={`rounded-xl border p-4 shadow-sm bg-background ${className ?? ''}`}>
+    <section
+      className={`rounded-xl border p-4 shadow-sm bg-background ${className ?? ''}`}
+    >
       {header && <div className="text-lg font-semibold">{header}</div>}
       {children && <div className="mt-2 text-sm text-muted-foreground">{children}</div>}
       {footer && <div className="mt-4 text-xs text-muted-foreground">{footer}</div>}

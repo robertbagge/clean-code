@@ -68,8 +68,12 @@ function Counter() {
 ```typescript
 type Theme = { primary: string; background: string }
 abstract class ThemeFactory { abstract create(): Theme }
-class LightFactory extends ThemeFactory { create() { return { primary: '#00f', background: '#fff' } } }
-class DarkFactory extends ThemeFactory { create() { return { primary: '#0af', background: '#111' } } }
+class LightFactory extends ThemeFactory {
+  create() { return { primary: '#00f', background: '#fff' } }
+}
+class DarkFactory extends ThemeFactory {
+  create() { return { primary: '#0af', background: '#111' } }
+}
 function useTheme(factory: ThemeFactory) {
   const [theme] = useState(() => factory.create())
   return theme
@@ -86,7 +90,10 @@ const themes = {
 
 function useTheme() {
   const [mode, setMode] = useState<'light' | 'dark'>('light')
-  return { colors: themes[mode], mode, toggle: () => setMode((m) => (m === 'light' ? 'dark' : 'light')) }
+  return {
+    colors: themes[mode], mode,
+    toggle: () => setMode((m) => (m === 'light' ? 'dark' : 'light'))
+  }
 }
 ```
 

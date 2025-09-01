@@ -25,7 +25,10 @@ test('submit is prevented when required fields are missing', async () => {
 
   render(
     <APIProvider value={{ userApi }}>
-      <UserCreationForm onUserCreated={onUserCreated} onCreateUserError={onCreateUserError} />
+      <UserCreationForm
+        onUserCreated={onUserCreated}
+        onCreateUserError={onCreateUserError}
+      />
     </APIProvider>
   )
 
@@ -36,11 +39,13 @@ test('submit is prevented when required fields are missing', async () => {
   // expect(screen.getByText(/name is required/i)).toBeInTheDocument()
 })
 
-test('submit form fails to error boundary when createUser return error', async () => {
+test('submit form fails to error boundary when createUser return error',
+  async () => {
   // test implementation asserting on UI error state and onCreateUserError called
 })
 
-test('submit form succeeds when form is valid and createUser returns success, async () => {
+test('submit form succeeds when form is valid and createUser returns success',
+  async () => {
   // test implementation asserting on UI success state and onUserCreated called
 })
 ```
@@ -50,9 +55,13 @@ test('submit form succeeds when form is valid and createUser returns success, as
 * Test initial renders
   * First render
   * Render after data has loaded
-* Test to check for unexpected re-renders. Component should not re-render if props stays the same.
+* Test to check for unexpected re-renders. Component should not re-render if
+  props stays the same.
 
-### 3. For critical UI components different display states can be regression tested with snapshots
+### 3. Snapshot testing for critical UI components
+
+For critical UI components, different display states can be regression tested
+with snapshots
 
 ## Hook Testing
 

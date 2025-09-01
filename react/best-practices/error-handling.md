@@ -2,8 +2,10 @@
 
 ## Error Taxonomy
 
-* Never surface network errors directly. Translate to UI-level errors that only disclose what they need to
-* Surface domain errors to the UI; log infra errors with context (never to console in prod)
+* Never surface network errors directly. Translate to UI-level errors that
+  only disclose what they need to
+* Surface domain errors to the UI; log infra errors with context (never to
+  console in prod)
 
 ### UI errors
 

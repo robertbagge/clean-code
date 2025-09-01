@@ -21,7 +21,8 @@ function ExportButton({ onExport, onError }: ExportButtonProps) {
   const [busy, setBusy] = useState(false)
   const click = async () => {
     setBusy(true)
-    try { await onExport() } catch (e) { onError?.(e as Error) } finally { setBusy(false) }
+    try { await onExport() } catch (e) { onError?.(e as Error) }
+    finally { setBusy(false) }
   }
   return <Button disabled={busy} onPress={click}>{busy ? 'Exporting…' : 'Export'}</Button>
 }
@@ -81,13 +82,16 @@ type CardProps = { header?: ReactNode; footer?: ReactNode; children?: ReactNode 
 * Keep prop identity stable to leverage `React.memo`.
 
 ```tsx
-const UserRow = React.memo(function UserRow({ user }: { user: User }) { /* ... */ })
+const UserRow = React.memo(function UserRow({ user }: { user: User }) {
+  /* ... */
+})
 ```
 
 ## Prop Drilling and Alternatives
 
 * If a prop crosses more than 2–3 levels and is truly global, use context.
-* For localized cross-cutting behavior, consider render props or a small provider near the subtree.
+* For localized cross-cutting behavior, consider render props or a small
+  provider near the subtree.
 
 ## TypeScript Tips
 
@@ -100,5 +104,7 @@ type AvatarProps = { readonly url: string; readonly size: number }
 
 ## Cross-Platform Notes (Web/Native)
 
-* Prefer platform-agnostic names (`onPress` in RN, `onClick` on web). If sharing code, consider adapter props or wrappers.
-* Avoid web-only DOM types in public prop signatures; use `ReactNode`, strings, numbers, objects.
+* Prefer platform-agnostic names (`onPress` in RN, `onClick` on web). If
+  sharing code, consider adapter props or wrappers.
+* Avoid web-only DOM types in public prop signatures; use `ReactNode`,
+  strings, numbers, objects.

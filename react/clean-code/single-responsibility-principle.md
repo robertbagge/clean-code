@@ -146,7 +146,8 @@ function ActivityList({ items }: { items: Activity[] }) {
     <ul className="card-body">
       {items.map((a) => (
         <li key={a.id}>
-          <span>{a.user}</span> — <span>{a.message}</span> <RelativeTime date={a.createdAt} />
+          <span>{a.user}</span> — <span>{a.message}</span>
+          <RelativeTime date={a.createdAt} />
         </li>
       ))}
     </ul>
@@ -154,7 +155,8 @@ function ActivityList({ items }: { items: Activity[] }) {
 }
 
 // 4) Small container: orchestrates local UI state and renders loading/error
-function ActivityPanel({ activityApi, me }: { activityApi: ActivityApi; me: string }) {
+function ActivityPanel({ activityApi, me }:
+  { activityApi: ActivityApi; me: string }) {
   const { items, loading, error, refresh } = useActivityFeed(activityApi)
   const [filter, setFilter] = React.useState<'all' | 'mine'>('all')
 
@@ -201,15 +203,19 @@ to achieve there goals. Always decouple where possible.
 
 ### Anti-patterns to Avoid
 
-1. **God components**: Components doing everything (fetching, state, formatting, rendering)
-2. **Business logic in components**: Calculations, validations, permissions in render/effects
+1. **God components**: Components doing everything (fetching, state,
+   formatting, rendering)
+2. **Business logic in components**: Calculations, validations, permissions
+   in render/effects
 3. **Mixed concerns in hooks**: One hook managing unrelated state/effects
 4. **Inline complex logic**: Large transformations, filtering, or sorting in JSX
-5. **Growing reducers/hooks**: “One hook to rule them all” accumulating flags and modes
+5. **Growing reducers/hooks**: "One hook to rule them all" accumulating
+   flags and modes
 
 ### React-Specific SRP Techniques
 
-1. **Custom hooks** for business logic and effects (test with injected deps)
+1. **Custom hooks** for business logic and effects (test with injected
+   deps)
 2. **Presentation/Container** split to isolate UI from orchestration
 3. **Utility functions/components** for formatting (e.g., `RelativeTime`)
 4. **API client/service modules** for network and persistence concerns

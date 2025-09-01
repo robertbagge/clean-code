@@ -2,7 +2,8 @@
 
 ## Goals
 
-* Consistent, descriptive names make intent obvious across React, Next.js, and React Native.
+* Consistent, descriptive names make intent obvious across React, Next.js,
+  and React Native.
 * Prefer clarity over brevity. Use the project’s domain language consistently.
 
 ## Components
@@ -16,7 +17,8 @@
 ## Hooks
 
 * Hooks start with `use`: `useUser`, `useAuth`, `useDebounce`.
-* Return a stable object with named fields; avoid positional tuples beyond common patterns.
+* Return a stable object with named fields; avoid positional tuples beyond
+  common patterns.
 * Eventful hooks use verb phrases: `useFetchUser`, `usePersistDraft`.
 
 ## "function" for components, "const" for the rest
