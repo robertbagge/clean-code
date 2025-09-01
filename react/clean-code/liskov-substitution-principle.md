@@ -428,4 +428,4 @@ In practice, focus LSP compliance on:
 ## Related Best Practices
 
 For component interfaces and testing patterns, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)

@@ -547,4 +547,4 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
 ## Related Best Practices
 
 For pragmatic approaches and patterns, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)

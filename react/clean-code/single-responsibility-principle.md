@@ -334,4 +334,4 @@ function UserProfile({ userId, userService }: {
 ## Related Best Practices
 
 For component structure, testing patterns, and state management, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)

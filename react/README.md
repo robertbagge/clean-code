@@ -1,7 +1,9 @@
 # Clean Code Docs — Start Here
 
-These docs help you make pragmatic React design choices. If you only read one
-thing, read **Dependency Inversion (DIP)**.
+These docs help you make pragmatic React design choices.
+Start with the documents in [best-practices](./best-practices/best-practices.md),
+[dependency-inversion-principle](./clean-code/dependency-inversion-principle.md)
+and then continue with the other [clean-code](./clean-code/) docs.
 
 ## Why lead with DIP?
 

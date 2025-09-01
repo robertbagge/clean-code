@@ -338,4 +338,4 @@ function UserList({ users }: { users: User[] }) {
 ## Related Best Practices
 
 For component composition and patterns, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)

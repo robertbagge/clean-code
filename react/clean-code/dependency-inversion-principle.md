@@ -368,4 +368,4 @@ describe('useUser', () => {
 ## Related Best Practices
 
 For dependency injection patterns and testing, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)

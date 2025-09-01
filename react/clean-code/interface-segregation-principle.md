@@ -420,4 +420,4 @@ function useUserActions(userId: string) {
 ## Related Best Practices
 
 For component composition and prop patterns, see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices.md](../best-practices/best-practices.md)
