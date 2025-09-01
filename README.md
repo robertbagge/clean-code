@@ -7,7 +7,7 @@ clean code can be drawn from.
 ## Folder index
 
 - [go/](/go/) – Go-specific examples ready to adapt in Go projects.
-- [react](/react/)` – React-specific examples ready to adapt in React projects.
+- [react/](/react/) – React-specific examples ready to adapt in React projects.
 - [general/](/general/) – language-agnostic examples and notes that apply broadly.
 
 ## How to use this repo from another codebase
