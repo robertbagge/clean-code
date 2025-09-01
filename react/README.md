@@ -46,7 +46,3 @@ day-to-day conventions, then consult a principle when shaping an API or refactor
 – Centralize repeating patterns (cards, date formatting, rules).
 * [Keep It Simple (KISS)](./clean-code/kiss-principle.md)
 – Start simple; refactor when pressure appears.
-
-## Check yourself before you ship
-
-* Use the quick [design checklist](./design-checklist.md) before shipping.
