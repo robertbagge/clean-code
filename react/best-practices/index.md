@@ -15,7 +15,7 @@
   rendering, context value stability, and effects hygiene.
 * [accessibility.md](./accessibility.md) — Semantic-first, focus/keyboard,
   overlays, contrast/motion, cross-platform notes, and UI library gotchas.
-<!-- * [styling.md](./styling.md) — Project-specific styling approaches;
-theming and tokens with contrast/focus considerations. -->
+* [styling.md](./styling.md) — Project-specific styling approaches;
+theming and tokens with contrast/focus considerations.
 * [folder-structure.md](./folder-structure.md) — Project-specific layout
   guidance and feature public APIs (barrels).
