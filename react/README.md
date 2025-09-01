@@ -25,11 +25,6 @@ then dip into the clean-code principles when necessary. Common starting points:
 [SRP](./clean-code/single-responsibility-principle.md) and
 [DIP](./clean-code/dependency-inversion-principle.md).
 
-## Start here
-
-* Read the [Best Practices index](./best-practices/index.md) for
-day-to-day conventions, then consult a principle when shaping an API or refactoring.
-
 ## Clean code principles
 
 * [Single Responsibility (SRP)](./clean-code/single-responsibility-principle.md)
