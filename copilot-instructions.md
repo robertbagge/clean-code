@@ -30,14 +30,12 @@ comments and patches.
 * Are we advising the **right thing** for Go/TS/React/Rust in real systems?
 * Are trade-offs and **limits** stated (not “always/never”)?
 * Does the **example actually follow the advice**?
+* Are there conflicts between recommendations or examples?
 
 ### 2) Ambiguity & community preferences
 
-* If a doc says “some prefer X”, provide:
-
-  * A **house-style default**, and
-  * A **decision rule**: “Use X when A/B, else Y”.
-* Keep alternatives short/neutral; do not derail the core guidance.
+* Does the doc have opinionated recommendations
+on something that’s often debated?
 
 ### 3) Cross-doc consistency
 
