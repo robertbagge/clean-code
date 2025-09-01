@@ -35,7 +35,7 @@ function Component(props: Props) {
 
 ```typescript
 const useX = () => {
-  // implementation  
+  // implementation
 }
 
 const doSomething = () => {
