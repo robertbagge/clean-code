@@ -15,7 +15,7 @@ data-fetch libraries, routing, forms, or styling system.
 
 ### For AI agent research
 
-Unless otherwise instructred, read all documents to get a full picture of best
+Unless otherwise instructed, read all documents to get a full picture of best
 practices & clean code before distilling for your task.
 
 ### For implementation guidance
