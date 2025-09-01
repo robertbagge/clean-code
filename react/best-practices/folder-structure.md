@@ -1,6 +1,6 @@
 # Folder Structure
 
-This guide does not got into details when it comes to folder structure as it
+This guide does not go into details when it comes to folder structure as it
 heavily depends on the project, engineer preferences and the frameworks in
 use. Have added some thoughts and will update this section when I have a
 strong opinion.
