@@ -157,10 +157,12 @@ import { FeedbackProvider } from './feedback-context'
 test('calls onFeedbackSent on successful submit', async () => {
   const onFeedbackSent = jest.fn()
   const onFeedbackError = jest.fn()
-  const sendFeedback = jest.fn().mockResolvedValue({ estimatedResponseTime: '24h' })
+  const feedbackApi = {
+    sendFeedback: jest.fn().mockResolvedValue({ estimatedResponseTime: '24h' })
+  }
 
   const { container } = render(
-    <FeedbackProvider value={{ sendFeedback }}>
+    <FeedbackProvider value={feedbackApi}>
       <FeedbackForm onFeedbackSent={onFeedbackSent} onFeedbackError={onFeedbackError} />
     </FeedbackProvider>
   )
