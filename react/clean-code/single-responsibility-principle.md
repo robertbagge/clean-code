@@ -23,23 +23,17 @@ In React, SRP means:
 
 ```typescript
 // types.ts
-interface User {
+interface Activity {
   id: string
-  name: string
-  email: string
-  avatar?: string
-  lastActive: Date
+  user: string
+  message: string
+  createdAt: Date
 }
 
-interface UserService {
-  getUser(id: string): Promise<User>
-  updateUser(id: string, data: Partial<User>): Promise<User>
+interface ActivityApi {
+  listRecent(): Promise<Activity[]>
 }
 
-// utils.ts
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US').format(date)
-}
 ```
 
 ### BAD — Multiple Responsibilities (SRP violation)
@@ -47,85 +41,58 @@ function formatDate(date: Date): string {
 > Component handles data fetching, state management, validation, and presentation.
 
 ```typescript
-function UserProfile({ userId }: { userId: string }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '' })
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
 
-  // VIOLATION: Data fetching mixed with component
-  useEffect(() => {
-    fetch(`/api/users/${userId}`)
-      .then(res => res.json())
-      .then(data => {
-        setUser(data)
-        setFormData({ name: data.name, email: data.email })
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [userId])
+function ActivityPanel({ activityApi }: { activityApi: ActivityApi }) {
+  const [items, setItems] = React.useState<Activity[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [filter, setFilter] = React.useState<'all' | 'mine'>('all')
+  const me = 'amy' // pretend from auth
 
-  // VIOLATION: Validation logic inside component
-  const validateForm = () => {
-    const errors: Record<string, string> = {}
-    if (!formData.name) errors.name = 'Name is required'
-    if (!formData.email) errors.email = 'Email is required'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format'
+  React.useEffect(() => {
+    let id: number | undefined
+    const load = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await activityApi.listRecent()
+        // inline sorting
+        setItems(data.slice().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e))
+      } finally {
+        setLoading(false)
+      }
     }
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    load()
+    id = window.setInterval(load, 15000) // polling mixed in
+    return () => clearInterval(id)
+  }, [activityApi])
 
-  // VIOLATION: Save logic mixed with component
-  const handleSave = async () => {
-    if (!validateForm()) return
-    
-    try {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      const updated = await res.json()
-      setUser(updated)
-      setEditing(false)
-    } catch (err) {
-      setError('Failed to save')
-    }
-  }
+  const visible = items.filter((a) => (filter === 'mine' ? a.user === me : true))
 
-  // VIOLATION: Date formatting logic in render
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-  if (!user) return null
+  if (loading) return <div>Loading…</div>
+  if (error) return <div role="alert">Failed to load: {error}</div>
 
   return (
-    <div>
-      {editing ? (
+    <div className="card">
+      <div className="card-header">
+        <strong>Activity</strong>
         <div>
-          <input
-            value={formData.name}
-            onChange={e => setFormData({ ...formData, name: e.target.value })}
-          />
-          {formErrors.name && <span>{formErrors.name}</span>}
-          <input
-            value={formData.email}
-            onChange={e => setFormData({ ...formData, email: e.target.value })}
-          />
-          {formErrors.email && <span>{formErrors.email}</span>}
-          <button onClick={handleSave}>Save</button>
+          <button onClick={() => setFilter('all')}>All</button>
+          <button onClick={() => setFilter('mine')}>Mine</button>
         </div>
-      ) : (
-        <div>
-          <h1>{user.name}</h1>
-          <p>{user.email}</p>
-          <p>Last active: {new Date(user.lastActive).toLocaleDateString()}</p>
-          <button onClick={() => setEditing(true)}>Edit</button>
-        </div>
-      )}
+      </div>
+      <ul className="card-body">
+        {visible.map((a) => (
+          <li key={a.id}>
+            <span>{a.user}</span> — <span>{a.message}</span> <em>· {dayjs(a.createdAt).fromNow()}</em>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -136,200 +103,129 @@ function UserProfile({ userId }: { userId: string }) {
 > Each component/hook has one clear responsibility.
 
 ```typescript
-// Validation logic extracted
-class UserValidator {
-  validateEmail(email: string): string | null {
-    if (!email) return 'Email is required'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return 'Invalid email format'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
+
+// 1) Formatting (single responsibility)
+function RelativeTime({ date }: { date: Date }) {
+  return <em>· {dayjs(date).fromNow()}</em>
+}
+
+// 2) Data hook: fetching + polling only
+function useActivityFeed(activityApi: ActivityApi, pollMs = 15000) {
+  const [items, setItems] = React.useState<Activity[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<Error | null>(null)
+
+  const load = React.useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await activityApi.listRecent()
+      setItems(data.slice().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+    } catch (e) {
+      setError(e as Error)
+    } finally {
+      setLoading(false)
     }
-    return null
-  }
+  }, [activityApi])
 
-  validateName(name: string): string | null {
-    if (!name) return 'Name is required'
-    if (name.length < 2) return 'Name must be at least 2 characters'
-    return null
-  }
+  React.useEffect(() => {
+    const id = window.setInterval(load, pollMs)
+    load()
+    return () => clearInterval(id)
+  }, [load, pollMs])
+
+  return { items, loading, error, refresh: load }
 }
 
-// Data fetching hook (single responsibility: user data management)
-function useUser(userId: string, service: UserService) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-
-  useEffect(() => {
-    service.getUser(userId)
-      .then(setUser)
-      .catch(setError)
-      .finally(() => setLoading(false))
-  }, [userId, service])
-
-  const updateUser = async (data: Partial<User>) => {
-    const updated = await service.updateUser(userId, data)
-    setUser(updated)
-    return updated
-  }
-
-  return { user, loading, error, updateUser }
-}
-
-// Form management hook (single responsibility: form state)
-function useUserForm(initialValues: { name: string; email: string }) {
-  const [values, setValues] = useState(initialValues)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const validator = new UserValidator()
-
-  const setValue = (field: string, value: string) => {
-    setValues(prev => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
-    setErrors(prev => ({ ...prev, [field]: '' }))
-  }
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {}
-    const nameError = validator.validateName(values.name)
-    const emailError = validator.validateEmail(values.email)
-    
-    if (nameError) newErrors.name = nameError
-    if (emailError) newErrors.email = emailError
-    
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  return { values, errors, setValue, validate }
-}
-
-// Display component (single responsibility: showing user info)
-function UserDisplay({ user, onEdit }: { 
-  user: User
-  onEdit: () => void 
-}) {
+// 3) Pure display: presentation only
+function ActivityList({ items }: { items: Activity[] }) {
   return (
-    <div className="user-display">
-      <h1>{user.name}</h1>
-      <p>{user.email}</p>
-      <p>Last active: {formatDate(user.lastActive)}</p>
-      <button onClick={onEdit}>Edit</button>
+    <ul className="card-body">
+      {items.map((a) => (
+        <li key={a.id}>
+          <span>{a.user}</span> — <span>{a.message}</span> <RelativeTime date={a.createdAt} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+// 4) Small container: orchestrates local UI state and renders loading/error
+function ActivityPanel({ activityApi, me }: { activityApi: ActivityApi; me: string }) {
+  const { items, loading, error, refresh } = useActivityFeed(activityApi)
+  const [filter, setFilter] = React.useState<'all' | 'mine'>('all')
+
+  const visible = React.useMemo(
+    () => items.filter((a) => (filter === 'mine' ? a.user === me : true)),
+    [items, filter, me]
+  )
+
+  if (loading) return <div>Loading…</div>
+  if (error) return <div role="alert">Failed to load: {error.message}</div>
+
+  return (
+    <div className="card">
+      <div className="card-header">
+        <strong>Activity</strong>
+        <div>
+          <button onClick={() => setFilter('all')}>All</button>
+          <button onClick={() => setFilter('mine')}>Mine</button>
+          <button onClick={refresh}>Refresh</button>
+        </div>
+      </div>
+      <ActivityList items={visible} />
     </div>
-  )
-}
-
-// Edit form component (single responsibility: editing UI)
-function UserEditForm({ 
-  user,
-  onSave,
-  onCancel 
-}: {
-  user: User
-  onSave: (data: Partial<User>) => void
-  onCancel: () => void
-}) {
-  const form = useUserForm({ name: user.name, email: user.email })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (form.validate()) {
-      onSave(form.values)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="user-form">
-      <div>
-        <input
-          value={form.values.name}
-          onChange={e => form.setValue('name', e.target.value)}
-          placeholder="Name"
-        />
-        {form.errors.name && <span className="error">{form.errors.name}</span>}
-      </div>
-      <div>
-        <input
-          value={form.values.email}
-          onChange={e => form.setValue('email', e.target.value)}
-          placeholder="Email"
-        />
-        {form.errors.email && <span className="error">{form.errors.email}</span>}
-      </div>
-      <button type="submit">Save</button>
-      <button type="button" onClick={onCancel}>Cancel</button>
-    </form>
-  )
-}
-
-// Container component (single responsibility: orchestration)
-function UserProfile({ userId, userService }: { 
-  userId: string
-  userService: UserService 
-}) {
-  const { user, loading, error, updateUser } = useUser(userId, userService)
-  const [editing, setEditing] = useState(false)
-
-  if (loading) return <LoadingSpinner />
-  if (error) return <ErrorMessage error={error} />
-  if (!user) return <EmptyState message="User not found" />
-
-  const handleSave = async (data: Partial<User>) => {
-    await updateUser(data)
-    setEditing(false)
-  }
-
-  return editing ? (
-    <UserEditForm 
-      user={user} 
-      onSave={handleSave}
-      onCancel={() => setEditing(false)}
-    />
-  ) : (
-    <UserDisplay 
-      user={user} 
-      onEdit={() => setEditing(true)}
-    />
   )
 }
 ```
 
-## When to Apply SRP in React
-
-### Apply SRP for
+### When to Apply SRP in React
 
 * Components mixing data fetching with presentation
 * Hooks handling multiple unrelated state pieces
-* Components with both form logic and display logic
+* Components that both orchestrate effects (polling/subscriptions) and render UI
 * Business logic mixed with UI components
 * Components that are hard to test in isolation
 
 ### Acceptable Coupling
 
 * Simple controlled inputs can handle their own state
-* Small components can combine related presentation logic
-* Container components can orchestrate multiple concerns
+* Small components can combine closely related presentation concerns
+* Light, inline formatting in display components is fine if it’s trivial and consistent
+* Container components can orchestrate multiple single-purpose children
+* Certain hooks that needs to intermingle business logic with ui logic
+to achieve there goals. Always decouple where possible.
 
-## Anti-patterns to Avoid
+### Anti-patterns to Avoid
 
-1. **God components**: Components doing everything
-2. **Business logic in components**: Calculations, validations in render
-3. **Mixed concerns in hooks**: One hook managing unrelated state
-4. **Inline complex logic**: Complex operations directly in JSX
+1. **God components**: Components doing everything (fetching, state, formatting, rendering)
+2. **Business logic in components**: Calculations, validations, permissions in render/effects
+3. **Mixed concerns in hooks**: One hook managing unrelated state/effects
+4. **Inline complex logic**: Large transformations, filtering, or sorting in JSX
+5. **Growing reducers/hooks**: “One hook to rule them all” accumulating flags and modes
 
-## React-Specific SRP Techniques
+### React-Specific SRP Techniques
 
-1. **Custom hooks** for business logic
-2. **Presentation/Container** component split
-3. **Utility functions** for formatting/validation
-4. **Service classes** for API interactions
-5. **Separate error boundary** components
+1. **Custom hooks** for business logic and effects (test with injected deps)
+2. **Presentation/Container** split to isolate UI from orchestration
+3. **Utility functions/components** for formatting (e.g., `RelativeTime`)
+4. **API client/service modules** for network and persistence concerns
+5. **Tiny effect hooks** for timers/polling/subscriptions that can be composed
+6. **Error Boundaries** to isolate failure handling near a feature/container,
+keeping display components pure
+7. **Suspense Boundaries** to isolate loading states at section/page edges;
+avoid sprinkling loading UI inside leaf components
 
-## Key Takeaways
+### Key Takeaways
 
-* Each component should have **one reason to change**
-* Extract **business logic into hooks**
-* Keep **presentation components pure**
-* Use **composition** to combine single-purpose components
-* **Test each piece** in isolation
+* Each component or hook should have **one reason to change**
+* Extract **business logic into hooks**; keep **presentation components pure**
+* Use **composition** to combine small, single-purpose pieces
+* **Inject dependencies** (APIs, loggers) to keep hooks/components testable
+* **Test each piece** in isolation (utils → unit; hooks → with stubs; UI → behavior)
 
 ## Related Best Practices
 
