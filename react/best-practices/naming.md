@@ -27,7 +27,7 @@
 
 ```typescript
 function Component(props: Props) {
-  // implementaiton
+  // implementation
 }
 ```
 
