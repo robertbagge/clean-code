@@ -11,11 +11,12 @@ ensure consistency across your application.
 
 In React, DRY means:
 
-* Centralize business rules and validation
 * Extract common UI patterns into reusable components
 * Use custom hooks for shared logic
-* Define constants and configurations once
-* Create single sources of truth for data transformations
+
+The above together with the other clean code and best practices will get
+you to a clean codebase. Using libraries for data loading, forms etc
+will get you a far way already.
 
 ## Implementation Example
 
