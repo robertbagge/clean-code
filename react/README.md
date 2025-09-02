@@ -6,10 +6,21 @@ A practical, opinionated guide to clean React: SOLID-style principles adapted
 for React + a set of best practices you can drop into any React-based codebase
 (React, Next.js, React Native).
 
+## Who it's for
+
+Engineers and AI agents building or refactoring React/Next.js/React Native apps.
+
 ## Scope & portability
 
-Framework-agnostic: applies to React DOM/Native/Next.js. No assumptions on
-data-fetching libraries, routing, forms, or styling system.
+Framework-agnostic: applies to React DOM/Native/Next.js.
+
+No strong opinions on:
+
+* folder structure
+* data-fetching libraries
+* routing
+* forms
+* styling system.
 
 ## How to use this guide
 
