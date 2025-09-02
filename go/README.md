@@ -2,9 +2,9 @@
 
 ## What this is
 
-A practical, opinionated guide to clean Go: SOLID-style principles adapted for Go
-
-* a set of best practices you can use across services, CLIs, and libraries.
+A practical, opinionated guide to clean Go: SOLID-style principles adapted for
+Go and a set of best practices you can use across
+services, CLIs, and libraries.
 
 ## Who it's for
 
