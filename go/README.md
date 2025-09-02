@@ -1,69 +1,64 @@
-# Clean Code Docs — Start Here
+# Clean Code – Go
 
-These docs help you make pragmatic Go design choices. If you only read one
-thing, read **Dependency Inversion (DIP)**.
+## What this is
 
-## Why lead with DIP?
+A practical, opinionated guide to clean Go: SOLID-style principles adapted for Go
 
-- **Testability:** Inject fakes/in-memory deps.
-- **Portability:** Swap drivers (SQL/Mongo/HTTP) without touching business
-  logic.
-- **Boundaries:** Consumers define interfaces; providers implement them.
+* a set of best practices you can use across services, CLIs, and libraries.
 
-👉 **Start here:** [Dependency Inversion (DIP)](clean-code/dependency-inversion.md)
+## Who it's for
 
----
+Engineers and AI agents building or refactoring Go codebases.
 
-## Jump to the right guide
+## Scope & portability
 
-- **New service or refactor?**  
-  Read: [DIP](clean-code/dependency-inversion.md) →
-  [SRP](clean-code/single-responsibility.md)  
-  Also see: [best-practices.md › Package Structure](./best-practices.md#package-structure)
-  and [› Dependency Injection](./best-practices.md#dependency-injection)
+Framework-agnostic: applies to standard library code, microservices, CLIs, and libraries.
 
-- **Business logic imports `database/sql` or an SDK?**  
-  Read: [DIP](clean-code/dependency-inversion.md)
+No strong opinions yet on:
 
-- **Huge interface / hard to test?**  
-  Read: [ISP](clean-code/interface-segregation.md)
+* frameworks/routers
+* ORMs or database drivers
+* logging/tracing libraries
+* DI tooling
+* channels
 
-- **Adding a backend means editing a switch?**  
-  Read: [OCP](clean-code/open-closed.md)
+## How to use this guide
 
-- **Two implementations behave differently?**  
-  Read: [LSP](clean-code/liskov-substitution.md)
+### For AI agent research
 
-- **Rules duplicated across handlers/services?**  
-  Read: [DRY](clean-code/dry.md)
+Unless otherwise instructed, read all documents to get a full picture of best
+practices & clean code before distilling for your task.
 
-- **Feels over-engineered?**  
-  Read: [KISS](clean-code/kiss.md)
+### For implementation guidance
 
----
+Lead with the [Best Practices](./best-practices.md),
+then apply these principles first:  
+[DIP](./clean-code/dependency-inversion.md),
+[SRP](./clean-code/single-responsibility.md),
+[ISP](./clean-code/interface-segregation.md),
+[DRY](./clean-code/dry.md),
+[KISS](./clean-code/kiss.md).  
 
-## Fast recipes (anchors into docs)
+Refer to [OCP](./clean-code/open-closed.md) and
+[LSP](./clean-code/liskov-substitution.md) as needed.
 
-- **Where to define interfaces** → [best-practices.md › Interfaces](./best-practices.md#interfaces)
-- **Domain errors & driver→domain mapping** → [best-practices.md › Error Handling](./best-practices.md#error-handling)
-- **Constructor injection / functional options** →
-  [best-practices.md › Dependency Injection](./best-practices.md#dependency-injection)
-- **Testing (fakes, table, golden, contract)** →
-  [best-practices.md › Testing Practices](./best-practices.md#testing-practices)
-- **Package layout** → [best-practices.md › Package Structure](./best-practices.md#package-structure)
+## Clean code principles
 
----
+* [Single Responsibility (SRP)](./clean-code/single-responsibility.md)
+  – One reason to change per function/type/package.
+* [Interface Segregation (ISP)](./clean-code/interface-segregation.md)
+  – Small, capability-focused interfaces; avoid fat “god” interfaces.
+* [Dependency Inversion (DIP)](./clean-code/dependency-inversion.md)
+  – Consumers define interfaces; inject implementations for testability/portability.
+* [Open–Closed (OCP)](./clean-code/open-closed.md)
+  – Add behavior via new implementations, not by editing callers.
+* [Liskov Substitution (LSP)](./clean-code/liskov-substitution.md)
+  – Implementations honor the same contracts, errors, and semantics.
+* [Don’t Repeat Yourself (DRY)](./clean-code/dry.md)
+  – Centralize rules, conversions, and cross-cutting utilities.
+* [Keep It Simple (KISS)](./clean-code/kiss.md)
+  – Prefer the simplest working design; avoid premature abstraction.
 
-## TL;DRs
-
-- **DIP:** Depend on interfaces defined by consumers; inject implementations.  
-- **SRP:** One reason to change per function/type/package.  
-- **ISP:** Small, capability-focused interfaces.  
-- **OCP:** Add new behavior via new implementations, not edits.  
-- **LSP:** Implementations honor the same behavior and error semantics.  
-- **DRY:** Single source of truth for rules/config.  
-- **KISS:** Simplest thing that works; avoid premature abstraction.
-
-## Check yourself before you wreck yourself
+## Check yourself before you ship
 
 Use the quick [design-checklist.md](./design-checklist.md) before shipping.
