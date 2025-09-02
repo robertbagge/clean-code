@@ -112,5 +112,5 @@ const userApi: UserApi = {
 }
 ```
 
-See [DIP hook test](../clean-code/dependency-inversion-principle.md#testing-with-dependency-injection)
+See [DIP hook test](../clean-code/dependency-inversion.md#testing-with-dependency-injection)
 for example.

@@ -118,9 +118,9 @@ you are considered done.
 ## File & Link Conventions
 
 - Place principle docs under `clean-code/`:  
-  `single-responsibility-principle.md`, `open-closed-principle.md`,
-  `interface-segregation-principle.md`, `dependency-inversion-principle.md`,
-  `liskov-substitution-principle.md`, `dry-principle.md`, `kiss-principle.md`.
+  `single-responsibility.md`, `open-closed.md`,
+  `interface-segregation.md`, `dependency-inversion.md`,
+  `liskov-substitution.md`, `dry.md`, `kiss.md`.
 - Use **relative links** to best practices: `../best-practices.md`.
 - Keep anchors consistent with headings in `best-practices.md`
 (e.g., `#package-structure`, `#interfaces`, `#testing-practices`).

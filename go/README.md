@@ -10,35 +10,35 @@ thing, read **Dependency Inversion (DIP)**.
   logic.
 - **Boundaries:** Consumers define interfaces; providers implement them.
 
-👉 **Start here:** [Dependency Inversion (DIP)](clean-code/dependency-inversion-principle.md)
+👉 **Start here:** [Dependency Inversion (DIP)](clean-code/dependency-inversion.md)
 
 ---
 
 ## Jump to the right guide
 
 - **New service or refactor?**  
-  Read: [DIP](clean-code/dependency-inversion-principle.md) →
-  [SRP](clean-code/single-responsibility-principle.md)  
+  Read: [DIP](clean-code/dependency-inversion.md) →
+  [SRP](clean-code/single-responsibility.md)  
   Also see: [best-practices.md › Package Structure](./best-practices.md#package-structure)
   and [› Dependency Injection](./best-practices.md#dependency-injection)
 
 - **Business logic imports `database/sql` or an SDK?**  
-  Read: [DIP](clean-code/dependency-inversion-principle.md)
+  Read: [DIP](clean-code/dependency-inversion.md)
 
 - **Huge interface / hard to test?**  
-  Read: [ISP](clean-code/interface-segregation-principle.md)
+  Read: [ISP](clean-code/interface-segregation.md)
 
 - **Adding a backend means editing a switch?**  
-  Read: [OCP](clean-code/open-closed-principle.md)
+  Read: [OCP](clean-code/open-closed.md)
 
 - **Two implementations behave differently?**  
-  Read: [LSP](clean-code/liskov-substitution-principle.md)
+  Read: [LSP](clean-code/liskov-substitution.md)
 
 - **Rules duplicated across handlers/services?**  
-  Read: [DRY](clean-code/dry-principle.md)
+  Read: [DRY](clean-code/dry.md)
 
 - **Feels over-engineered?**  
-  Read: [KISS](clean-code/kiss-principle.md)
+  Read: [KISS](clean-code/kiss.md)
 
 ---
 

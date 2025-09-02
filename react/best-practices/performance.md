@@ -67,4 +67,4 @@ const handleSelect = useCallback((id: string) => onSelect(id), [onSelect])
 ## Notes
 
 * Large object props cause shallow-compare misses; pass only what you use.
-See [ISP](../clean-code/interface-segregation-principle.md)
+See [ISP](../clean-code/interface-segregation.md)

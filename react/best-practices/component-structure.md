@@ -3,7 +3,7 @@
 ## Goals
 
 * Separate concerns between display, data loading & business logic
-* Applies the [single-responsibility-principle](../clean-code/single-responsibility-principle.md)
+* Applies the [single-responsibility](../clean-code/single-responsibility.md)
 
 ## Use composition to allow for reuse and efficient renders
 
@@ -102,7 +102,7 @@ function UserSection({ userId }: Props) {
 * Return data and functions for components to use
 * Accept dependencies for testability
 * Wrap in hook that loads dependencies from provider
-* Applies the [dependency-inversion-principle](../clean-code/dependency-inversion-principle.md)
+* Applies the [dependency-inversion](../clean-code/dependency-inversion.md)
 
 ```typescript
 type UseUserResult = {

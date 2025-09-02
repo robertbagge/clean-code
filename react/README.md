@@ -22,22 +22,22 @@ practices & clean code before distilling for your task.
 
 Lead with the [Best Practices index](./best-practices/index.md),
 then dip into the clean-code principles when necessary. Common starting points:
-[SRP](./clean-code/single-responsibility-principle.md) and
-[DIP](./clean-code/dependency-inversion-principle.md).
+[SRP](./clean-code/single-responsibility.md) and
+[DIP](./clean-code/dependency-inversion.md).
 
 ## Clean code principles
 
-* [Single Responsibility (SRP)](./clean-code/single-responsibility-principle.md)
+* [Single Responsibility (SRP)](./clean-code/single-responsibility.md)
 – One responsibility per component/hook. Split fetching/formatting/presentation.
-* [Interface Segregation (ISP)](./clean-code/interface-segregation-principle.md)
+* [Interface Segregation (ISP)](./clean-code/interface-segregation.md)
 – Lean props; composition over fat prop bags.
-* [Dependency Inversion (DIP)](./clean-code/dependency-inversion-principle.md)
+* [Dependency Inversion (DIP)](./clean-code/dependency-inversion.md)
 – Depend on interfaces; inject implementations via props/context.
-* [Open–Closed (OCP)](./clean-code/open-closed-principle.md)
+* [Open–Closed (OCP)](./clean-code/open-closed.md)
 – Extend via composition/children; avoid modifying core components.
-* [Liskov Substitution (LSP)](./clean-code/liskov-substitution-principle.md)
+* [Liskov Substitution (LSP)](./clean-code/liskov-substitution.md)
 – Variants honor the same contract; consistent callbacks/semantics.
-* [Don’t Repeat Yourself (DRY)](./clean-code/dry-principle.md)
+* [Don’t Repeat Yourself (DRY)](./clean-code/dry.md)
 – Centralize repeating patterns (cards, date formatting, rules).
-* [Keep It Simple (KISS)](./clean-code/kiss-principle.md)
+* [Keep It Simple (KISS)](./clean-code/kiss.md)
 – Start simple; refactor when pressure appears.
