@@ -9,7 +9,7 @@ for React + a set of best practices you can drop into any React-based codebase
 ## Scope & portability
 
 Framework-agnostic: applies to React DOM/Native/Next.js. No assumptions on
-data-fetch libraries, routing, forms, or styling system.
+data-fetching libraries, routing, forms, or styling system.
 
 ## How to use this guide
 
@@ -21,7 +21,8 @@ practices & clean code before distilling for your task.
 ### For implementation guidance
 
 Lead with the [Best Practices index](./best-practices/index.md),
-then dip into the clean-code principles when necessary. Common starting points:
+then dip into the clean-code principles as needed.
+Common starting points:
 [SRP](./clean-code/single-responsibility.md) and
 [DIP](./clean-code/dependency-inversion.md).
 
