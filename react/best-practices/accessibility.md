@@ -56,6 +56,24 @@ import { Pressable, Text } from 'react-native'
 </Pressable>
 ```
 
+### React Native Loading & Error States
+
+```tsx
+// Loading with screen reader announcement
+<YStack accessibilityLabel="Loading plan details">
+  <Spinner size="large" />
+</YStack>
+
+// Error with live region for dynamic announcements
+<YStack
+  accessibilityRole="alert"
+  accessibilityLiveRegion="polite"
+>
+  <Paragraph>Failed to load</Paragraph>
+  <Paragraph>{error.message}</Paragraph>
+</YStack>
+```
+
 ## Keyboard and Focus
 
 * All interactive elements must be reachable with keyboard or remote.

@@ -37,6 +37,11 @@ Common starting points:
 [SRP](./clean-code/single-responsibility.md) and
 [DIP](./clean-code/dependency-inversion.md).
 
+### For React Native / Expo projects
+
+Start with [React Native Best Practices](./best-practices/react-native.md)
+for platform-specific patterns, then refer to general principles.
+
 ## Clean code principles
 
 * [Single Responsibility (SRP)](./clean-code/single-responsibility.md)

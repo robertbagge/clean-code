@@ -114,3 +114,22 @@ const userApi: UserApi = {
 
 See [DIP hook test](../clean-code/dependency-inversion.md#testing-with-dependency-injection)
 for example.
+
+## React Native: Provider-Based Container Testing
+
+Instead of jest.mock, wrap containers in test providers:
+
+```typescript
+// Mock storage via provider
+const mockStorage = { getTrip: jest.fn().mockResolvedValue(mockTrip) }
+
+render(
+  <StorageProvider value={mockStorage}>
+    <SavedTripDetails />
+  </StorageProvider>
+)
+
+await waitFor(() => expect(screen.getByText('Trip Title')).toBeTruthy())
+```
+
+Only mock external libraries you don't control (expo-router, react-navigation).

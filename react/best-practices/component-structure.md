@@ -75,6 +75,31 @@ function UserCard({ userId }: Props) {
 }
 ```
 
+### React Native: Same Display, Multiple Containers
+
+```typescript
+// Display (pure presentation)
+function PlanDisplay({ plan, loading, error }) {
+  if (loading) return <Spinner />
+  if (error) return <Text>{error.message}</Text>
+  return <View><Text>{plan.title}</Text></View>
+}
+
+// Container 1: From cache
+function CachedPlan() {
+  const queryClient = useQueryClient()
+  const plan = queryClient.getQueryData(['plans'])?.[0]
+  return <PlanDisplay plan={plan} />
+}
+
+// Container 2: From storage
+function StoredPlan() {
+  const storage = useStorage()
+  const { data, loading, error } = useAsync(() => storage.get('plan'))
+  return <PlanDisplay plan={data} loading={loading} error={error} />
+}
+```
+
 ### 3. (Optional) loading/error boundary close to the component
 
 * Handle error and loading states close to the page/screen section
