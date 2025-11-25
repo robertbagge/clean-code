@@ -19,3 +19,5 @@
 theming and tokens with contrast/focus considerations.
 * [folder-structure.md](./folder-structure.md) — Project-specific layout
   guidance and feature public APIs (barrels).
+* [relay.md](./relay.md) — Relay GraphQL patterns: fragment colocation,
+  container/display split, query naming, and testing.
