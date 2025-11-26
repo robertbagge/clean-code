@@ -14,11 +14,18 @@ Engineers and AI agents building or refactoring Go codebases.
 
 Framework-agnostic: applies to standard library code, microservices, CLIs, and libraries.
 
+### Opinions
+
+We have established patterns for:
+
+* **Logging**: `log/slog` with JSON handlers — see [logging.md](./best-practices/logging.md)
+* **Database**: sqlc for type-safe queries with pgx — see [database.md](./best-practices/database.md)
+* **Repository**: Domain-scoped repositories with DB-to-domain mapping — see [repository.md](./best-practices/repository.md)
+* **Configuration**: Environment-based config — see [configuration.md](./best-practices/configuration.md)
+
 No strong opinions yet on:
 
 * frameworks/routers
-* ORMs or database drivers
-* logging/tracing libraries
 * DI tooling
 * channels
 
@@ -31,7 +38,7 @@ practices & clean code before distilling for your task.
 
 ### For implementation guidance
 
-Lead with the [Best Practices](./best-practices.md),
+Lead with the [Best Practices](./best-practices/),
 then apply these principles first:  
 [DIP](./clean-code/dependency-inversion.md),
 [SRP](./clean-code/single-responsibility.md),
