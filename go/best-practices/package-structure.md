@@ -90,6 +90,87 @@ This ensures the **dependency graph points inward**:
 
 ---
 
+## Service Patterns
+
+### Interface Wrappers for External Clients
+
+When integrating external services (LLM clients, APIs, SDKs), wrap them with an interface
+to enable dependency injection and testing:
+
+```go
+// Define the interface your service needs
+type LLMClient interface {
+    GenerateResponse(ctx context.Context, prompt string) (Response, error)
+}
+
+// Compile-time interface verification
+var _ LLMClient = (*OpenAIClient)(nil)
+
+// Concrete implementation wraps the external SDK
+type OpenAIClient struct {
+    sdk *openai.Client
+}
+
+func (c *OpenAIClient) GenerateResponse(ctx context.Context, prompt string) (Response, error) {
+    return c.sdk.CreateCompletion(ctx, prompt)
+}
+```
+
+The `var _ Interface = (*Impl)(nil)` pattern catches interface mismatches at compile time
+rather than runtime.
+
+### Pipeline Orchestration with Parallel Goroutines
+
+For multi-step pipelines with independent operations, use goroutines with result channels:
+
+```go
+func (s *PipelineService) GenerateActions(ctx context.Context, input Input) (*Results, error) {
+    type result struct {
+        name   string
+        output Output
+        err    error
+    }
+
+    resultCh := make(chan result, 3)
+
+    // Launch independent operations in parallel
+    go func() {
+        out, err := s.client.GenerateLightActions(ctx, input)
+        resultCh <- result{name: "light", output: out, err: err}
+    }()
+    go func() {
+        out, err := s.client.GenerateSleepActions(ctx, input)
+        resultCh <- result{name: "sleep", output: out, err: err}
+    }()
+    go func() {
+        out, err := s.client.GenerateNutritionActions(ctx, input)
+        resultCh <- result{name: "nutrition", output: out, err: err}
+    }()
+
+    // Collect results with context cancellation support
+    results := &Results{}
+    for i := 0; i < 3; i++ {
+        select {
+        case r := <-resultCh:
+            if r.err != nil {
+                return nil, fmt.Errorf("%s failed: %w", r.name, r.err)
+            }
+            // assign to results based on r.name
+        case <-ctx.Done():
+            return nil, ctx.Err()
+        }
+    }
+    return results, nil
+}
+```
+
+Key points:
+* Buffered channel sized to expected result count
+* Context cancellation support in the select
+* First error fails fast (or collect all errors if preferred)
+
+---
+
 ## Further Reading
 
 * [Dependency Inversion (DIP)](../clean-code/dependency-inversion.md)
