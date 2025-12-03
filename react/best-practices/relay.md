@@ -15,7 +15,7 @@ spreads the fragment without knowing what fields are inside.
 ```typescript
 // TripCard.tsx — declares its own data requirements
 import { graphql, useFragment } from 'react-relay'
-import type { TripCard_trip$key } from './__generated__/TripCard_trip.graphql'
+import type { TripCard_trip$key } from './__relay__'
 
 const tripFragment = graphql`
   fragment TripCard_trip on trip {
