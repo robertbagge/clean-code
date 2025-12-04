@@ -9,7 +9,7 @@
 ## Components
 
 * Components are PascalCase nouns: `UserCard`, `AccountScreen`, `SettingsPanel`.
-* Files match component names: `UserCard.tsx`.
+* Files use kebab-case: `user-card.tsx`, `account-screen.tsx`.
 * Display vs container naming to make consuming code neat and clean
   * Display/UI-only:
     * `XDisplay` when there is a container/behavioural wrapper, e.g
@@ -111,3 +111,19 @@ type AsyncState<T> = Loading | Failure | Success<T>
 * One component per file when practical.
 * Re-export public APIs via `index.ts` within a feature folder.
 * Avoid abbreviation-heavy names; consistency beats terseness.
+
+### Filename Convention
+
+All files use **kebab-case**: `user-card.tsx`, `use-auth.ts`, `api-client.ts`.
+
+```
+// GOOD
+user-card.tsx
+use-fetch-user.ts
+auth-provider.tsx
+
+// BAD
+UserCard.tsx
+useFetchUser.ts
+AuthProvider.tsx
+```

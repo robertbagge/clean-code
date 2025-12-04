@@ -17,7 +17,9 @@
   overlays, contrast/motion, cross-platform notes, and UI library gotchas.
 * [styling.md](./styling.md) — Project-specific styling approaches;
 theming and tokens with contrast/focus considerations.
-* [folder-structure.md](./folder-structure.md) — Project-specific layout
-  guidance and feature public APIs (barrels).
+* [expo-folder-structure.md](./expo-folder-structure.md) — Expo app folder
+  structure, layer definitions, and dependency direction.
+* [imports.md](./imports.md) — Import aliases (`@this/*`), barrel exports,
+  and ESLint enforcement.
 * [relay.md](./relay.md) — Relay GraphQL patterns: fragment colocation,
   container/display split, query naming, and testing.
