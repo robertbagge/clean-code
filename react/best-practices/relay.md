@@ -117,7 +117,9 @@ export function TripListScreen() {
 ```
 
 Place boundaries close to the component that fetches data. This allows
-independent loading states for different parts of the UI.
+independent loading states for different parts of the UI. The exception is lists,
+you can't place suspense boundaries around the list items and need to wrap the list
+itself in a suspense boundary with deterministic skeletons instead.
 
 ## Query naming
 
