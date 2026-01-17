@@ -13,7 +13,9 @@ interface PlanDetailsDisplayProps {
   error?: Error | null
 }
 
-export function PlanDetailsDisplay({ plan, loading, error }: PlanDetailsDisplayProps) {
+export function PlanDetailsDisplay(
+  { plan, loading, error }: PlanDetailsDisplayProps
+) {
   const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([0]))
 
   if (loading) return <YStack accessibilityLabel="Loading"><Spinner /></YStack>

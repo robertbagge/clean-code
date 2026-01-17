@@ -175,4 +175,4 @@ func (f *FakeNotifier) Send(ctx context.Context, m string) error {
 
 For package structure, where to define interfaces, error placement, and
 testing patterns (fakes, table-driven tests, golden files), see
-👉 **[best-practices.md](../best-practices.md)**
+👉 [best-practices](../best-practices/index.md)

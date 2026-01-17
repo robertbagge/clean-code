@@ -317,4 +317,4 @@ type Config struct {
 ## Related Best Practices
 
 For package structure, error placement, and testing strategies, etc., see
-👉 [best-practices.md](../best-practices.md)
+👉 [best-practices](../best-practices/index.md)

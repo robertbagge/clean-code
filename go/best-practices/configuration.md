@@ -127,7 +127,7 @@ For Cloud Run with Supavisor (or similar poolers):
 
 | Setting | Value | Why |
 |---------|-------|-----|
-| `QueryExecModeSimpleProtocol` | Required | Transaction mode poolers don't support prepared statements |
+| `QueryExecModeSimpleProtocol` | Required | No prepared stmt support |
 | `MaxConns = 15` | Moderate | Cloud Run instances share pooler connections |
 | `MinConns = 3` | Low | Balance warmth vs resource usage |
 | `MaxConnLifetime = 1h` | Standard | Rotate connections periodically |

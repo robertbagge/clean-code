@@ -54,7 +54,7 @@ import { UserCard, UserAvatar } from '@this/features/user'
 import { UserCard } from '@this/features/user/components/user-card'
 ```
 
-### Why?
+### Benefits
 
 * **Encapsulation**: Internal structure can change without breaking consumers
 * **Discoverability**: Barrel shows what's public

@@ -23,9 +23,9 @@ func (c *Counter) Add(delta int)    { c.n += clamp(delta) }
 func (c *Counter) Value() int       { return c.n }
 
 func clamp(x int) int { // unexported: not tested directly
-	if x < -1000 { return -1000 }
-	if x > 1000  { return 1000 }
-	return x
+    if x < -1000 { return -1000 }
+    if x > 1000  { return 1000 }
+    return x
 }
 ```
 
@@ -35,17 +35,17 @@ func clamp(x int) int { // unexported: not tested directly
 package counter_test
 
 import (
-	"testing"
+    "testing"
 
-	"example.com/project/counter"
+    "example.com/project/counter"
 )
 
 func TestCounter_Add(t *testing.T) {
-	c := counter.New()
-	c.Add(5000)     // exercises upper clamp through public API
-	if got := c.Value(); got != 1000 {
-		t.Fatalf("Value()=%d, want 1000", got)
-	}
+    c := counter.New()
+    c.Add(5000)     // exercises upper clamp through public API
+    if got := c.Value(); got != 1000 {
+        t.Fatalf("Value()=%d, want 1000", got)
+    }
 }
 ```
 

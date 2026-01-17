@@ -9,7 +9,7 @@ organization.
 
 ### Standard component structure
 
-```
+```text
 firmware/esp32/components/
 └── my-component/
     ├── CMakeLists.txt      # Component build configuration
@@ -114,7 +114,7 @@ class LightController::Impl {
 
 ### Abstract interfaces in separate directory
 
-```
+```text
 firmware/
 ├── interfaces/           # Platform-agnostic abstractions
 │   ├── Clock.h
@@ -238,7 +238,7 @@ namespace light {
 
 ### Component tests alongside source
 
-```
+```text
 firmware/esp32/components/ble/
 ├── include/
 ├── src/
@@ -249,7 +249,7 @@ firmware/esp32/components/ble/
 
 ### Core tests separate from ESP32 code
 
-```
+```text
 firmware/
 ├── core/
 │   ├── src/
@@ -266,7 +266,7 @@ firmware/
 
 ## Main Application Structure
 
-```
+```text
 firmware/esp32/main/
 ├── CMakeLists.txt
 ├── main.cpp              # app_main entry point
@@ -296,7 +296,7 @@ idf_component_register(
 
 ### Inward-pointing dependencies
 
-```
+```text
                     main
                      │
          ┌──────────┼──────────┐

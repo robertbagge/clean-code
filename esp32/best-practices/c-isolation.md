@@ -327,7 +327,7 @@ TEST(LightController, FadeInSetsIncreasingBrightness) {
 
 ## Project Structure
 
-```
+```text
 firmware/
 ├── interfaces/          # Abstract C++ interfaces
 │   ├── Clock.h

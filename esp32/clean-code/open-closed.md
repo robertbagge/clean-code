@@ -138,7 +138,8 @@ public:
 
 protected:
     // Customization point — derived classes override
-    virtual void handleWriteImpl(const esp_ble_gatts_cb_param_t::write& write) = 0;
+    virtual void handleWriteImpl(
+        const esp_ble_gatts_cb_param_t::write& write) = 0;
 };
 
 // Extension — specific profile

@@ -188,6 +188,7 @@ public:
 ## Splitting an Existing Interface
 
 Before:
+
 ```cpp
 class IDeviceController {
     virtual void init() = 0;
@@ -200,6 +201,7 @@ class IDeviceController {
 ```
 
 After:
+
 ```cpp
 class ILifecycle {
     virtual void init() = 0;

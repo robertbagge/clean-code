@@ -239,7 +239,7 @@ void processMode(ModeType mode) {
 
 ## Refactoring Toward Simplicity
 
-### Questions to ask:
+### Questions to ask
 
 1. Can I remove this abstraction without losing functionality?
 2. Does this generalization solve a real problem or a hypothetical one?

@@ -23,7 +23,8 @@ private:
     void run() {
         while (true) {
             LightCommand cmd{};
-            if (xQueueReceive(m_commandQueue, &cmd, pdMS_TO_TICKS(100)) == pdPASS) {
+            if (xQueueReceive(m_commandQueue, &cmd,
+                              pdMS_TO_TICKS(100)) == pdPASS) {
                 processCommand(cmd);
             }
             vTaskDelay(10);

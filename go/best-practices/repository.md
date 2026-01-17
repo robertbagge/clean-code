@@ -14,15 +14,24 @@ domain types—not database types:
 package repository
 
 type PlanRequestRepository interface {
-    GetPendingPlanRequests(ctx context.Context, limit int32) ([]domain.PlanRequest, error)
-    GetPlanRequestByID(ctx context.Context, id string) (*domain.PlanRequest, error)
-    UpdateStatus(ctx context.Context, id string, status domain.PlanRequestStatus, errMsg *string, errDetails map[string]any) error
+    GetPendingPlanRequests(
+        ctx context.Context, limit int32,
+    ) ([]domain.PlanRequest, error)
+    GetPlanRequestByID(
+        ctx context.Context, id string,
+    ) (*domain.PlanRequest, error)
+    UpdateStatus(
+        ctx context.Context, id string, status domain.PlanRequestStatus,
+        errMsg *string, errDetails map[string]any,
+    ) error
     MarkStarted(ctx context.Context, id string) error
     MarkCompleted(ctx context.Context, id string) error
 }
 
 type TripRepository interface {
-    GetTripWithJourneys(ctx context.Context, tripID string) (*domain.TripWithJourneys, error)
+    GetTripWithJourneys(
+        ctx context.Context, tripID string,
+    ) (*domain.TripWithJourneys, error)
 }
 ```
 
@@ -58,7 +67,9 @@ satisfies the interface at compile time.
 Create mapping functions to convert sqlc-generated types to domain types:
 
 ```go
-func (r *PlanRequestRepo) GetPendingPlanRequests(ctx context.Context, limit int32) ([]domain.PlanRequest, error) {
+func (r *PlanRequestRepo) GetPendingPlanRequests(
+    ctx context.Context, limit int32,
+) ([]domain.PlanRequest, error) {
     rows, err := r.queries.GetPendingPlanRequests(ctx, limit)
     if err != nil {
         return nil, fmt.Errorf("get pending plan requests: %w", err)
@@ -124,7 +135,9 @@ RetryCount: deref(row.RetryCount),  // *int32 → int32
 Map database errors to domain errors in the repository:
 
 ```go
-func (r *PlanRequestRepo) GetPlanRequestByID(ctx context.Context, id string) (*domain.PlanRequest, error) {
+func (r *PlanRequestRepo) GetPlanRequestByID(
+    ctx context.Context, id string,
+) (*domain.PlanRequest, error) {
     row, err := r.queries.GetPlanRequestByID(ctx, id)
     if err != nil {
         if err == pgx.ErrNoRows {
@@ -145,7 +158,9 @@ func (r *PlanRequestRepo) GetPlanRequestByID(ctx context.Context, id string) (*d
 For complex data that spans multiple tables, compose queries in the repository:
 
 ```go
-func (r *TripRepo) GetTripWithJourneys(ctx context.Context, tripID string) (*domain.TripWithJourneys, error) {
+func (r *TripRepo) GetTripWithJourneys(
+    ctx context.Context, tripID string,
+) (*domain.TripWithJourneys, error) {
     // First query: get the trip
     tripRow, err := r.queries.GetTripByID(ctx, tripID)
     if err != nil {

@@ -8,7 +8,7 @@
 
 ## Mobile App Structure
 
-```
+```text
 expo-app/
 ├── src/
 │   ├── app/           # Routes only (Expo Router)
@@ -71,7 +71,7 @@ Business logic organized by domain. Reusable & extractable across apps.
 * Expose public API via barrel (`index.ts`)
 * A feature can use components from another feature
 
-```
+```text
 features/
 ├── auth/
 │   ├── components/
@@ -99,7 +99,7 @@ Lives outside `src/`. Not production code.
 
 Layers should only import from layers below them:
 
-```
+```text
 app/
   ↓
 core/  →  features/  →  components/

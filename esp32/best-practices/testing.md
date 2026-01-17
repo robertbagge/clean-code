@@ -8,7 +8,7 @@ Patterns for host-based unit testing with googletest and gmock.
 
 Run tests on your development machine without ESP-IDF or hardware:
 
-```
+```text
 firmware/
 ├── core/                  # Platform-agnostic code
 │   ├── src/
@@ -160,7 +160,7 @@ TEST(Program, GetCurrentState_5PercentComplete) {
 
 ### One test file per component
 
-```
+```text
 firmware/core/tests/programs/
 ├── ProgramTests.cpp
 └── ProgramManagerTests.cpp

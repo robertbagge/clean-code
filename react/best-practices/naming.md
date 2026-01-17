@@ -116,7 +116,7 @@ type AsyncState<T> = Loading | Failure | Success<T>
 
 All files use **kebab-case**: `user-card.tsx`, `use-auth.ts`, `api-client.ts`.
 
-```
+```text
 // GOOD
 user-card.tsx
 use-fetch-user.ts

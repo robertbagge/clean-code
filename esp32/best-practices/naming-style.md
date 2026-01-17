@@ -84,7 +84,7 @@ namespace light { }
 
 ### Headers — PascalCase matching class name
 
-```
+```text
 LightController.h
 BLEApplication.h
 ESP32Logger.h
@@ -93,7 +93,7 @@ ILogger.h           // Interface with I prefix
 
 ### Source files — matching header
 
-```
+```text
 LightController.cpp
 BLEApplication.cpp
 ESP32Logger.cpp
@@ -101,7 +101,7 @@ ESP32Logger.cpp
 
 ### Test files — `*Tests.cpp` suffix
 
-```
+```text
 ProgramTests.cpp
 BLECommandParserTests.cpp
 MockLoggerTests.cpp

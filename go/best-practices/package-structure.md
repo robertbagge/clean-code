@@ -66,7 +66,7 @@ var (
 
 This ensures the **dependency graph points inward**:
 
-```
+```text
        ┌─────────┐
        │  main   │
        └────┬────┘
@@ -111,20 +111,25 @@ type OpenAIClient struct {
     sdk *openai.Client
 }
 
-func (c *OpenAIClient) GenerateResponse(ctx context.Context, prompt string) (Response, error) {
+func (c *OpenAIClient) GenerateResponse(
+    ctx context.Context, prompt string,
+) (Response, error) {
     return c.sdk.CreateCompletion(ctx, prompt)
 }
 ```
 
-The `var _ Interface = (*Impl)(nil)` pattern catches interface mismatches at compile time
-rather than runtime.
+The `var _ Interface = (*Impl)(nil)` pattern catches interface mismatches at
+compile time rather than runtime.
 
 ### Pipeline Orchestration with Parallel Goroutines
 
-For multi-step pipelines with independent operations, use goroutines with result channels:
+For multi-step pipelines with independent operations, use goroutines with
+result channels:
 
 ```go
-func (s *PipelineService) GenerateActions(ctx context.Context, input Input) (*Results, error) {
+func (s *PipelineService) GenerateActions(
+    ctx context.Context, input Input,
+) (*Results, error) {
     type result struct {
         name   string
         output Output
@@ -165,6 +170,7 @@ func (s *PipelineService) GenerateActions(ctx context.Context, input Input) (*Re
 ```
 
 Key points:
+
 * Buffered channel sized to expected result count
 * Context cancellation support in the select
 * First error fails fast (or collect all errors if preferred)

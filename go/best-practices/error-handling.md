@@ -23,7 +23,9 @@ Don't leak infrastructure errors (e.g. `sql.ErrNoRows`, `pgx.ErrNoRows`) to
 business code:
 
 ```go
-func (r *UserRepo) GetByID(ctx context.Context, id string) (*domain.User, error) {
+func (r *UserRepo) GetByID(
+    ctx context.Context, id string,
+) (*domain.User, error) {
     row, err := r.queries.GetUserByID(ctx, id)
     if err != nil {
         if err == pgx.ErrNoRows {
