@@ -4,6 +4,40 @@ Patterns for safe, efficient memory management in embedded C++.
 
 ---
 
+## Stack First — Heap as Fallback
+
+**The fundamental rule**: Prefer stack allocation. Use heap only when stack
+won't work.
+
+### Why stack first?
+
+* **Deterministic**: No allocation failures, no fragmentation
+* **Fast**: No allocator overhead, just stack pointer adjustment
+* **Safe**: Automatic cleanup when scope exits
+* **Predictable**: Memory usage known at compile time
+
+### When heap is acceptable
+
+Use heap **only** when:
+
+1. **Size unknown at compile time** (truly dynamic data)
+2. **Object outlives current scope** (ownership transfer)
+3. **Polymorphism required** (virtual dispatch needs pointer)
+4. **Stack would overflow** (very large buffers, >1KB typical threshold)
+
+```cpp
+// STACK FIRST — Default choice
+std::array<uint8_t, 256> buffer;           // Fixed size, stack
+CommandParser parser;                       // Value type, stack
+RGB color{255, 128, 64};                   // Small struct, stack
+
+// HEAP ONLY WHEN NECESSARY
+std::unique_ptr<LightMode> mode;           // Polymorphic, needs heap
+std::vector<uint8_t> dynamicData(size);    // Runtime size, needs heap
+```
+
+---
+
 ## RAII (Resource Acquisition Is Initialization)
 
 Wrap resources in objects whose destructors clean up automatically:
@@ -86,33 +120,87 @@ public:
 
 ---
 
-## Stack vs Heap
+## Stack Allocation Patterns
 
-### Prefer stack allocation for small, fixed-size data
+### Default to stack for all fixed-size data
 
 ```cpp
-// GOOD — Stack allocated, no heap overhead
+// GOOD — Stack allocated, deterministic
 void processPacket() {
     std::array<uint8_t, 64> buffer;
+    PacketHeader header;
     // Use buffer...
-}  // Automatically cleaned up
+}  // Automatic cleanup, no fragmentation
 
-// AVOID — Unnecessary heap allocation
+// BAD — Unnecessary heap allocation
 void processPacket() {
     auto buffer = std::make_unique<std::array<uint8_t, 64>>();
+    auto header = std::make_unique<PacketHeader>();
+    // Why heap? Fixed size, doesn't outlive scope
+}
+```
+
+### Stack-based class members
+
+```cpp
+// GOOD — Members on stack (inside object)
+class CommandProcessor {
+private:
+    std::array<uint8_t, 256> m_buffer;  // Stack when object is stack
+    CommandParser m_parser;              // Value member, not pointer
+    size_t m_bufferLen = 0;
+};
+
+// Usage — entire object on stack
+void handleCommand() {
+    CommandProcessor processor;  // All members stack-allocated
+    processor.process(data);
+}
+```
+
+---
+
+## When Heap Is Necessary
+
+### Polymorphism requires indirection
+
+```cpp
+// Heap needed — runtime type selection
+class LightController {
+private:
+    std::unique_ptr<LightMode> m_currentMode;  // Could be Sunrise, Candle, etc.
+
+public:
+    void setMode(ModeType type) {
+        // Must use heap for polymorphic ownership
+        m_currentMode = createMode(type);
+    }
+};
+```
+
+### Ownership transfer across scopes
+
+```cpp
+// Heap needed — object outlives creating function
+std::unique_ptr<LightMode> createMode(ModeType type) {
+    return std::make_unique<OwllarkSunrise>();  // Caller owns result
+}
+```
+
+### Truly dynamic size
+
+```cpp
+// Heap needed — size unknown at compile time
+void receiveData(size_t len) {
+    std::vector<uint8_t> buffer(len);  // Runtime size requires heap
     // ...
 }
 ```
 
-### Use heap for dynamic or large allocations
+### Very large buffers
 
 ```cpp
-// OK — Size determined at runtime
-std::unique_ptr<uint8_t[]> createBuffer(size_t size) {
-    return std::make_unique<uint8_t[]>(size);
-}
-
-// OK — Large buffer that would overflow stack
+// Heap acceptable — would overflow typical 4-8KB task stack
 auto largeBuffer = std::make_unique<std::array<uint8_t, 8192>>();
 ```
 
@@ -120,27 +208,27 @@ auto largeBuffer = std::make_unique<std::array<uint8_t, 8192>>();
 
 ## Containers
 
-### Use `std::vector` for dynamic arrays
+### Prefer `std::array` (stack) over `std::vector` (heap)
 
 ```cpp
-// BAD — Raw array with manual management
-uint8_t* data = new uint8_t[count];
-// ... use data
-delete[] data;
+// BEST — Fixed size known at compile time → std::array (stack)
+std::array<uint8_t, 64> buffer;
+std::array<LightCommand, 10> commandHistory;
 
-// GOOD — Vector manages memory
-std::vector<uint8_t> data(count);
-// ... use data
-// Automatic cleanup
+// ACCEPTABLE — Size truly dynamic → std::vector (heap)
+std::vector<uint8_t> data(runtimeSize);
+
+// BAD — Using vector when size is fixed
+std::vector<uint8_t> buffer(64);  // Why not std::array?
 ```
 
-### Use `std::array` for fixed-size arrays
+### Avoid C-style arrays
 
 ```cpp
-// BAD — C-style array, no bounds checking
+// BAD — C-style array, no bounds checking, decays to pointer
 uint8_t buffer[64];
 
-// GOOD — std::array with bounds checking
+// GOOD — std::array with bounds checking, doesn't decay
 std::array<uint8_t, 64> buffer;
 buffer.at(i);  // Throws on out-of-bounds
 ```
@@ -217,12 +305,12 @@ std::shared_ptr<Config> sharedConfig;
 
 ## Memory-Constrained Patterns
 
-### Preallocate buffers
+### Preallocate fixed buffers as members
 
 ```cpp
 class CommandProcessor {
 private:
-    std::array<uint8_t, 256> m_buffer;  // Preallocated
+    std::array<uint8_t, 256> m_buffer;  // Preallocated, no runtime allocation
     size_t m_bufferLen = 0;
 
 public:
@@ -235,29 +323,67 @@ public:
 };
 ```
 
-### Use placement new for memory pools (advanced)
+### Fixed-capacity collections
 
 ```cpp
-// Preallocated memory pool for frequently created objects
-alignas(Command) std::array<uint8_t, sizeof(Command) * 10> pool;
-size_t poolIndex = 0;
+// Instead of std::vector that grows dynamically
+template<typename T, size_t Capacity>
+class FixedVector {
+private:
+    std::array<T, Capacity> m_data;
+    size_t m_size = 0;
 
-Command* allocateCommand() {
-    void* mem = &pool[poolIndex * sizeof(Command)];
-    poolIndex++;
-    return new(mem) Command();
-}
+public:
+    bool push_back(const T& value) {
+        if (m_size >= Capacity) return false;
+        m_data[m_size++] = value;
+        return true;
+    }
+    // ...
+};
+
+// Usage — all stack, no heap fragmentation
+FixedVector<LightCommand, 10> commandQueue;
+```
+
+### Object pools on stack (advanced)
+
+```cpp
+// Preallocated pool avoids repeated allocation/deallocation
+template<typename T, size_t Size>
+class ObjectPool {
+private:
+    std::array<T, Size> m_objects;
+    std::array<bool, Size> m_inUse{};
+
+public:
+    T* acquire() {
+        for (size_t i = 0; i < Size; i++) {
+            if (!m_inUse[i]) {
+                m_inUse[i] = true;
+                return &m_objects[i];
+            }
+        }
+        return nullptr;
+    }
+
+    void release(T* obj) {
+        size_t idx = obj - m_objects.data();
+        if (idx < Size) m_inUse[idx] = false;
+    }
+};
 ```
 
 ---
 
 ## Key Takeaways
 
-* **Always use RAII** — resources cleaned up automatically
-* **Prefer `std::unique_ptr`** for owned heap objects
-* **Use references** for non-owning dependencies
-* **Stack-allocate** small, fixed-size data
-* **Never use raw `new`/`delete`** in application code
+* **Stack first** — heap is a fallback, not the default
+* **`std::array` over `std::vector`** when size is known
+* **Heap only when necessary** — polymorphism, ownership transfer, dynamic size
+* **RAII always** — resources cleaned up automatically
+* **`std::unique_ptr`** when heap is required
+* **Never raw `new`/`delete`** in application code
 
 ## Related Best Practices
 
